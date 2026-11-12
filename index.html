@@ -2,14 +2,14 @@
 <html lang="fr">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Des jeux pour couples chrÃ©tiens, Ã  jouer ensemble ou Ã  distance.">
+<meta name="description" content="Des jeux pour couples chrétiens, à jouer ensemble ou à distance.">
 <meta name="theme-color" content="#11152A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Corde Ã  Trois Fils">
-<meta property="og:description" content="Des jeux pour couples chrÃ©tiens, Ã  jouer ensemble ou Ã  distance.">
+<meta property="og:title" content="Corde à Trois Fils">
+<meta property="og:description" content="Des jeux pour couples chrétiens, à jouer ensemble ou à distance.">
 <meta property="og:image" content="couverture.png">
 <meta name="twitter:card" content="summary_large_image">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -326,11 +326,9 @@ const GAMES = [
 
 const MARIAGE = [
  "Comment imagines-tu la gestion de l'argent dans notre foyer : compte commun, comptes séparés, qui décide quoi ?",
- "Quelle place la dîme et la générosité auront-elles dans notre budget ?",
  "Souhaites-tu des enfants ? Combien, et quand ?",
  "Comment aimerais-tu transmettre la foi à nos enfants ?",
  "Quelle place nos familles auront-elles dans nos décisions de couple ?",
- "Dans quelle église nous vois-tu servir, et comment ?",
  "Qu'attends-tu de moi dans les tâches de la maison ?",
  "Comment vis-tu l'attente et la pureté avant le mariage, et comment puis-je t'aider ?",
  "Quelle blessure du passé pourrait peser sur notre mariage si nous n'en parlons pas ?",
@@ -538,7 +536,70 @@ function runPrier(st){
 </script>
 
 <script>
-/* Installation : bouton affichÃ© quand le navigateur le propose, et fonctionnement hors connexion. */
+/* Banque de questions : en ligne, toute la banque du site ; hors connexion, 300 par jeu depuis la copie locale. */
+var BANQUE = (async function(){
+  var hors = !navigator.onLine, MAX = 300, compte = {};
+  async function lignes(nom){
+    var r = await fetch("donnees/" + nom + ".txt", {cache: hors ? "force-cache" : "no-cache"});
+    if (!r.ok) throw new Error(nom);
+    return (await r.text()).split(/\r?\n/).map(function(l){ return l.trim() }).filter(Boolean);
+  }
+  function sansTitres(a){ return a.filter(function(l){ return l.charAt(0) !== "#" }) }
+  function coupe(a){ return hors ? a.slice(0, MAX) : a }
+  function remplace(cible, a){ if (a.length){ cible.length = 0; Array.prototype.push.apply(cible, a) } return a.length }
+
+  try {
+    var q = sansTitres(await lignes("quiz")).map(function(l){ var p = l.split("|"); return {q: p[0], o: p.slice(1, 5), a: p[1]} })
+      .filter(function(x){ return x.o.length === 4 });
+    compte.quiz = remplace(QUIZ, coupe(q));
+  } catch (e) {}
+
+  try {
+    var v = sansTitres(await lignes("versets")).map(function(l){ var p = l.split("|"); return {t: p[0], a: p[1], r: p[2]} })
+      .filter(function(x){ return x.t && x.a && x.r && x.t.indexOf("{}") >= 0 });
+    v = coupe(v);
+    var pas = [7, 31, 97, 13, 53, 3, 71];
+    var jeu = v.map(function(x, i){
+      var o = [x.a];
+      for (var k = 0; k < pas.length && o.length < 4; k++){
+        var c = v[(i + pas[k]) % v.length].a;
+        if (!o.some(function(m){ return m.toLowerCase() === c.toLowerCase() })) o.push(c);
+      }
+      return {q: x.t.replace("{}", "_____"), o: o, a: x.a, r: x.r + " (BYM)"};
+    }).filter(function(x){ return x.o.length === 4 });
+    compte.vers = remplace(VERSETS, jeu);
+    remplace(PAROLES, v.map(function(x){ return [x.t.replace("{}", x.a), x.r] }));
+  } catch (e) {}
+
+  try {
+    var cats = {}, cat = null;
+    (await lignes("coeur")).forEach(function(l){
+      if (l.charAt(0) === "#"){ cat = l.slice(1).trim(); cats[cat] = [] } else if (cat) cats[cat].push(l);
+    });
+    var noms = Object.keys(cats).filter(function(k){ return cats[k].length });
+    if (noms.length){
+      Object.keys(COEUR).forEach(function(k){ delete COEUR[k] });
+      var part = Math.floor(MAX / noms.length), total = 0;
+      noms.forEach(function(k){ COEUR[k] = hors ? cats[k].slice(0, part) : cats[k]; total += COEUR[k].length });
+      compte.coeur = total;
+    }
+  } catch (e) {}
+
+  try { compte.qui = remplace(QUI, coupe(sansTitres(await lignes("qui")))) } catch (e) {}
+  try { compte.mariage = remplace(MARIAGE, coupe(sansTitres(await lignes("mariage")))) } catch (e) {}
+  try {
+    var d = sansTitres(await lignes("defis")).filter(function(l){ return /^[deb] /.test(l) }).map(function(l){ return [l.charAt(0), l.slice(2)] });
+    compte.defi = remplace(DEFIS, d);
+  } catch (e) {}
+
+  var note = document.getElementById("prem");
+  if (note && Object.keys(compte).length) note.textContent = hors
+    ? "Sept jeux gratuits. Hors connexion : 300 questions par jeu."
+    : "Sept jeux gratuits. En ligne : toute la banque de questions, enrichie régulièrement.";
+  return compte;
+})();
+
+/* Installation : bouton affiché quand le navigateur le propose, et fonctionnement hors connexion. */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});
 (function(){
   var offre = null, zone = document.querySelector("#home .setup");

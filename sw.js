@@ -1,6 +1,8 @@
-// Garde l'application disponible hors connexion. Changez le numéro pour forcer une mise à jour.
-const CACHE = "ctf-v1";
-const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
+// Garde l'application et sa banque de questions disponibles hors connexion.
+// Changez le numéro ci-dessous pour forcer une mise à jour chez tous les joueurs.
+const CACHE = "ctf-v2";
+const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png",
+  "donnees/quiz.txt", "donnees/versets.txt", "donnees/coeur.txt", "donnees/qui.txt", "donnees/defis.txt", "donnees/mariage.txt"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -8,7 +10,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-// Réseau d'abord pour avoir la dernière version ; copie locale si le réseau manque.
+// Réseau d'abord pour avoir la dernière banque ; copie locale si le réseau manque.
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
