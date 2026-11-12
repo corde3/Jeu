@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Des jeux pour couples chrÃ©tiens, Ã  jouer ensemble ou Ã  distance.">
+<meta name="theme-color" content="#11152A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Corde Ã  Trois Fils">
+<meta property="og:description" content="Des jeux pour couples chrÃ©tiens, Ã  jouer ensemble ou Ã  distance.">
+<meta property="og:image" content="couverture.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Corde à Trois Fils</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout : une colonne étroite façon appli mobile. Accueil = réglages du couple + grille de jeux
+   marqués chacun par un éclat de vitrail ; écran de jeu = une seule carte centrale et ses actions. */
+:root{
+  --bg:#ECEEF5; --surface:#FFFFFF; --ink:#1A2042; --muted:#5A6283; --line:#D3D8E7;
+  --ruby:#B3264A; --gold:#B87D0E; --azur:#2B5FB8; --emerald:#1C7A63; --violet:#6B3FA0;
+  --ok:#1C7A63; --ko:#B3264A; --on-ink:#FFFFFF;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11152A; --surface:#1B2040; --ink:#ECEEF8; --muted:#A3AAC8; --line:#30375E;
+  --ruby:#F2728F; --gold:#E9B64F; --azur:#82AAF3; --emerald:#62CFB1; --violet:#B997EA;
+  --ok:#62CFB1; --ko:#F2728F; --on-ink:#11152A; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#11152A; --surface:#1B2040; --ink:#ECEEF8; --muted:#A3AAC8; --line:#30375E;
+  --ruby:#F2728F; --gold:#E9B64F; --azur:#82AAF3; --emerald:#62CFB1; --violet:#B997EA;
+  --ok:#62CFB1; --ko:#F2728F; --on-ink:#11152A; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.app{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
+h1{font-size:clamp(2rem,8vw,2.9rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.label{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--azur);outline-offset:2px}
+
+/* éclat de vitrail */
+.glass{width:44px;height:44px;flex:none;border-radius:10px;
+  background:conic-gradient(from 35deg,var(--c) 0 28%,color-mix(in srgb,var(--c) 55%,var(--surface)) 0 52%,color-mix(in srgb,var(--c) 80%,var(--ink)) 0 71%,color-mix(in srgb,var(--c) 30%,var(--surface)) 0);
+  box-shadow:inset 0 0 0 2px var(--ink)}
+.hero{display:flex;gap:16px;align-items:center}
+.hero .glass{width:64px;height:64px;border-radius:50% 50% 10px 10px;--c:var(--ruby);
+  background:conic-gradient(from 20deg,var(--ruby) 0 20%,var(--gold) 0 40%,var(--azur) 0 60%,var(--emerald) 0 80%,var(--violet) 0)}
+
+.setup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.field{flex:1 1 140px;min-width:0;display:flex;flex-direction:column;gap:4px}
+input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.seg{display:flex;border:1px solid var(--line);border-radius:12px;padding:3px;background:var(--bg);gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:9px 8px;border-radius:9px;font-weight:600;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--on-ink)}
+
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.game{display:flex;gap:14px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r);padding:14px;cursor:pointer;transition:transform .12s,border-color .12s}
+.game:hover{border-color:var(--c);transform:translateY(-1px)}
+.game div{min-width:0}
+.game strong{font-family:var(--display);font-size:1.05rem;display:block}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+
+.card{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--c);border-radius:var(--r);
+  padding:24px 20px;display:flex;flex-direction:column;gap:16px;min-height:220px}
+.card .big{font-family:var(--display);font-size:clamp(1.3rem,5vw,1.7rem);font-weight:500;line-height:1.25;text-wrap:balance}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--bg);padding:12px 14px;border-radius:10px;cursor:pointer;font-weight:500}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt.good{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--surface))}
+.opt.bad{border-color:var(--ko);background:color-mix(in srgb,var(--ko) 14%,var(--surface))}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:transparent;padding:6px 12px;border-radius:999px;font-size:.875rem;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip[aria-pressed=true]{background:var(--c);border-color:var(--c);color:var(--on-ink)}
+.scores{display:flex;gap:10px}
+.score{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}
+.score.turn{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.score b{font-family:var(--display);font-size:1.5rem;font-variant-numeric:tabular-nums;display:block}
+.score span{display:block;overflow-wrap:anywhere}
+.steps{display:flex;flex-direction:column;gap:14px}
+.steps > div{border-left:3px solid var(--c);padding-left:12px}
+blockquote{margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.3}
+.badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;border:1px solid var(--gold);color:var(--gold);
+  font-family:var(--body);font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle}
+.game.locked .glass{filter:grayscale(1);opacity:.55}
+.list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+@media (prefers-reduced-motion:reduce){.game{transition:none}}
+</style>
+
+<div class="app">
+  <section id="home">
+    <div class="app">
+      <header class="hero">
+        <div class="glass" aria-hidden="true"></div>
+        <div>
+          <h1>Corde à Trois Fils</h1>
+          <p class="muted">Des jeux pour vous deux, avec Elohîm au milieu. <span class="small">Ecclésiaste 4:12</span></p>
+        </div>
+      </header>
+
+      <div class="setup">
+        <div class="row">
+          <label class="field"><span class="label">Prénom 1</span><input type="text" id="n1" maxlength="20" placeholder="Elle"></label>
+          <label class="field"><span class="label">Prénom 2</span><input type="text" id="n2" maxlength="20" placeholder="Lui"></label>
+        </div>
+        <div>
+          <div class="label" style="margin-bottom:4px">Comment jouez-vous ?</div>
+          <div class="seg" role="group" aria-label="Mode de jeu">
+            <button type="button" id="m-e" aria-pressed="true">Ensemble</button>
+            <button type="button" id="m-d" aria-pressed="false">À distance</button>
+          </div>
+        </div>
+        <div id="codebox" hidden>
+          <label class="field"><span class="label">Code du couple</span>
+            <input type="text" id="code" maxlength="24" placeholder="ex. cana2026"></label>
+          <p class="small muted" style="margin-top:6px">Ouvrez l'appli chacun de votre côté pendant votre appel et saisissez le même code. Vous verrez les mêmes cartes et les mêmes questions, dans le même ordre.</p>
+        </div>
+        <p class="small muted" id="modehint">Un seul appareil suffit : passez-le-vous à tour de rôle.</p>
+      </div>
+
+      <div>
+        <h2>Choisissez un jeu</h2>
+        <p class="small muted" id="prem" style="margin-bottom:10px"></p>
+        <div class="games" id="games"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="play" hidden>
+    <div class="app">
+      <div class="top">
+        <button type="button" class="btn" id="back">← Jeux</button>
+        <span class="label" id="round"></span>
+      </div>
+      <div>
+        <h2 id="gtitle" style="font-size:1.6rem"></h2>
+        <p class="muted small" id="gsub"></p>
+      </div>
+      <div id="stage" class="app" style="gap:14px"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------- Contenu ---------- */
+const QUIZ = [
+ ["Qui a travaillé quatorze ans pour épouser Rachel ?",["Jacob","Ésaü","Isaac","Laban"]],
+ ["Qui est devenue l'épouse de Booz ?",["Ruth","Naomi","Orpa","Esther"]],
+ ["Où Jésus a-t-il accompli son premier miracle ?",["Aux noces de Cana","À Capernaüm","À Béthanie","À Jéricho"]],
+ ["Comment s'appelait l'épouse d'Abraham ?",["Sara","Rebecca","Léa","Agar"]],
+ ["Qui était l'épouse d'Isaac ?",["Rebecca","Rachel","Débora","Mical"]],
+ ["Quel couple a accueilli et enseigné Apollos ?",["Aquilas et Priscille","Ananias et Saphira","Zacharie et Élisabeth","Joseph et Marie"]],
+ ["Combien de livres compte le Nouveau Testament ?",["27","22","39","31"]],
+ ["Quel prophète a passé trois jours dans le ventre d'un grand poisson ?",["Jonas","Élie","Amos","Daniel"]],
+ ["Qui étaient les parents de Jean-Baptiste ?",["Zacharie et Élisabeth","Joseph et Marie","Elkana et Anne","Amram et Jokébed"]],
+ ["Qui était la mère du prophète Samuel ?",["Anne","Peninna","Élisabeth","Ruth"]],
+ ["Quelle reine a risqué sa vie pour sauver son peuple ?",["Esther","Vasthi","Jézabel","Bath-Schéba"]],
+ ["Pendant combien de jours la pluie est-elle tombée lors du déluge ?",["40","7","12","150"]],
+ ["Quel est le premier fruit de l'Esprit cité dans Galates 5:22 ?",["L'amour","La joie","La paix","La patience"]],
+ ["Quel disciple a renié Jésus trois fois ?",["Pierre","Thomas","Judas","Jean"]],
+ ["Quel chapitre est souvent appelé « l'hymne à l'amour » ?",["1 Corinthiens 13","Romains 8","Jean 3","Psaume 23"]],
+ ["Dans quelle ville Jésus est-il né ?",["Bethléhem","Nazareth","Jérusalem","Cana"]],
+ ["Qui a interprété les songes de Pharaon ?",["Joseph","Moïse","Daniel","Aaron"]],
+ ["Sur quelle montagne Moïse a-t-il reçu la loi ?",["Le Sinaï","Le Carmel","Le mont des Oliviers","Le Nebo"]],
+ ["Quel prophète est monté au ciel dans un tourbillon ?",["Élie","Élisée","Hénoc","Ésaïe"]],
+ ["Qui était la belle-mère de Ruth ?",["Naomi","Anne","Sara","Débora"]],
+ ["Quel livre biblique célèbre l'amour entre l'époux et l'épouse ?",["Le Cantique des cantiques","L'Ecclésiaste","Les Proverbes","Osée"]],
+ ["Qui a dit : « Où tu iras j'irai » ?",["Ruth","Rebecca","Marie","Rachel"]],
+ ["Qui a vaincu Goliath ?",["David","Saül","Jonathan","Samson"]],
+ ["Quel est le verset le plus court, « Jésus pleura » ?",["Jean 11:35","Luc 19:41","Jean 3:16","Marc 1:1"]],
+ ["Qui Elohîm a-t-il demandé à Osée d'aimer malgré son infidélité ?",["Gomer","Dalila","Thamar","Rahab"]],
+ ["Quel roi a demandé à Elohîm la sagesse plutôt que la richesse ?",["Salomon","David","Ézéchias","Josias"]],
+ ["Qui a été jeté dans la fosse aux lions ?",["Daniel","Jérémie","Joseph","Paul"]],
+ ["À qui Jésus ressuscité est-il apparu en premier ?",["Marie de Magdala","Pierre","Thomas","Jean"]]
+].map(([q,o])=>({q,o,a:o[0]}));
+
+/* Versets : Bible de Yéhoshoua ha Mashiah (BYM) */
+const PAROLES = [
+ ["YHWH est mon Berger : je ne manquerai de rien.","Psaume 23:1"],
+ ["Car là où deux ou trois sont rassemblés en mon nom, je suis là au milieu d'eux.","Matthieu 18:20"],
+ ["Nous l'aimons, parce qu'il nous a aimés le premier.","1 Jean 4:19"],
+ ["Je puis toutes choses en Mashiah qui me fortifie.","Philippiens 4:13"],
+ ["Ta parole est une lampe à mes pieds et une lumière sur mon sentier.","Psaume 119:105"],
+ ["… la corde à trois fils ne se rompt pas vite.","Ecclésiaste 4:12"]
+];
+const VERSETS = [
+ ["L'amour est {}, il se montre doux, l'amour n'est pas envieux…","patient",["fidèle","joyeux","humble"],"1 Corinthiens 13:4"],
+ ["YHWH est mon {} : je ne manquerai de rien.","Berger",["Rocher","Bouclier","Refuge"],"Psaume 23:1"],
+ ["Je puis toutes choses en Mashiah qui me {}.","fortifie",["conduit","pardonne","appelle"],"Philippiens 4:13"],
+ ["Confie-toi de tout ton {} en YHWH et ne t'appuie pas sur ton discernement.","cœur",["esprit","être","courage"],"Proverbes 3:5"],
+ ["… la corde à {} fils ne se rompt pas vite.","trois",["deux","sept","douze"],"Ecclésiaste 4:12"],
+ ["Nous l'aimons, parce qu'il nous a aimés le {}.","premier",["plus","mieux","jour"],"1 Jean 4:19"],
+ ["Il n'est pas bon pour l'être humain d'être {}.","seul",["triste","oisif","pauvre"],"Genèse 2:18"],
+ ["… ce que l'Elohîm a mis ensemble sous un joug, que l'humain ne le {} pas !","sépare",["brise","quitte","méprise"],"Matthieu 19:6"],
+ ["… toutes choses concourent au {} de ceux qui aiment Elohîm…","bien",["salut","repos","bonheur"],"Romains 8:28"],
+ ["Beaucoup d'eaux ne pourraient éteindre cet {}-là…","amour",["espoir","élan","attachement"],"Cantique des cantiques 8:7"],
+ ["Mais moi et ma {}, nous servirons YHWH.","maison",["famille","femme","tribu"],"Josué 24:15"],
+ ["Ta parole est une {} à mes pieds et une lumière sur mon sentier.","lampe",["force","source","garde"],"Psaume 119:105"],
+ ["Car là où deux ou trois sont rassemblés en mon {}, je suis là au milieu d'eux.","nom",["amour","temple","Esprit"],"Matthieu 18:20"],
+ ["Que le {} ne se couche pas sur votre indignation.","soleil",["jour","soir","silence"],"Éphésiens 4:26"],
+ ["… ton peuple sera mon {} et ton Elohîm sera mon Elohîm.","peuple",["refuge","pays","frère"],"Ruth 1:16"],
+ ["Mais ceux qui s'attendent à YHWH renouvelleront leur {}.","force",["foi","joie","jeunesse"],"Ésaïe 40:31"]
+].map(([t,a,w,r])=>({q:t.replace("{}","_____"),o:[a,...w],a,r:r+" (BYM)"}));
+
+const COEUR = {
+ "Foi":[
+  "Quel verset t'accompagne le plus en ce moment, et pourquoi ?",
+  "À quel moment as-tu senti Elohîm particulièrement proche de toi ?",
+  "Qu'est-ce que tu aimerais que nous priions plus souvent ensemble ?",
+  "Quel personnage de la Bible te ressemble le plus ?",
+  "Comment puis-je t'encourager dans ta marche avec Elohîm cette semaine ?",
+  "Quelle prière exaucée t'a le plus marqué ?",
+  "Qu'est-ce qui nourrit le mieux ta foi : la louange, la lecture, le silence, le service ?",
+  "Y a-t-il un doute ou une question spirituelle dont tu aimerais me parler ?"],
+ "Nous deux":[
+  "Quel geste de ma part te fait te sentir le plus aimé(e) ?",
+  "Qu'est-ce que tu admires chez moi et que tu ne me dis pas assez ?",
+  "Dans quel domaine avons-nous le plus grandi depuis le début ?",
+  "Qu'est-ce qui te manque le plus quand nous sommes loin l'un de l'autre ?",
+  "Quand t'es-tu senti(e) vraiment écouté(e) par moi dernièrement ?",
+  "Y a-t-il quelque chose pour lequel tu aimerais me demander pardon, ou que je te demande pardon ?",
+  "Qu'est-ce qui te fait rire chez nous ?",
+  "Comment aimerais-tu que nous réglions nos désaccords ?"],
+ "Avenir":[
+  "À quoi ressemble le foyer dont tu rêves ?",
+  "Quel service ou quelle mission aimerais-tu que nous portions ensemble ?",
+  "Quelle tradition familiale voudrais-tu créer avec moi ?",
+  "Où nous vois-tu dans cinq ans ?",
+  "Quelle peur as-tu pour notre avenir, que nous pourrions confier à Elohîm ?",
+  "Quel couple autour de nous t'inspire, et pourquoi ?",
+  "Quel voyage aimerais-tu que nous fassions un jour ?",
+  "Qu'aimerais-tu que l'on dise de notre couple dans trente ans ?"],
+ "Souvenirs":[
+  "Quel est ton premier souvenir de moi ?",
+  "À quel moment as-tu su que notre relation était sérieuse ?",
+  "Quel est le plus beau moment que nous avons vécu ensemble ?",
+  "Quelle épreuve traversée ensemble nous a rendus plus forts ?",
+  "Quel message ou quelle lettre de moi as-tu gardé précieusement ?",
+  "Quel fou rire partagé n'oublieras-tu jamais ?",
+  "Quel chant te rappelle notre histoire ?",
+  "Raconte un moment où tu as vu Elohîm agir dans notre relation."]
+};
+
+const QUI = [
+ "Qui prie le plus longtemps ?","Qui s'endort le premier pendant un appel ?","Qui pardonne le plus vite ?",
+ "Qui chante le plus fort pendant la louange ?","Qui dit « je t'aime » le premier dans la journée ?",
+ "Qui est le plus souvent en retard ?","Qui connaît le plus de versets par cœur ?","Qui pleure devant un film ?",
+ "Qui envoie les plus longs messages ?","Qui a le dernier mot dans une discussion ?",
+ "Qui pense à organiser les surprises ?","Qui est le plus gourmand ?","Qui se lève le plus tôt ?",
+ "Qui prend le plus de photos ?","Qui garde le mieux son calme ?","Qui oublie où il a posé ses affaires ?",
+ "Qui encourage l'autre quand le moral baisse ?","Qui propose le plus souvent de prier ?",
+ "Qui danse le mieux ?","Qui cuisine le mieux ?"
+];
+
+const DEFIS = [
+ ["d","Envoie un message vocal d'une minute où tu pries pour lui ou pour elle."],
+ ["d","Lisez le même psaume ce soir, chacun de votre côté, puis partagez le verset qui vous a touchés."],
+ ["d","Écris à la main une lettre de dix lignes et envoie-en la photo."],
+ ["d","Préparez le même repas en appel vidéo et dînez ensemble."],
+ ["d","Envoie trois photos de ta journée avec une raison de dire merci à Elohîm pour chacune."],
+ ["d","Choisissez un chant de louange et écoutez-le en même temps."],
+ ["d","Enregistre-toi en train de lire 1 Corinthiens 13 et envoie-le."],
+ ["d","Fixez la date de vos prochaines retrouvailles et priez pour ce jour."],
+ ["d","Montre en vidéo l'endroit où tu pries d'habitude."],
+ ["d","Commande ou poste une petite surprise à son adresse cette semaine."],
+ ["e","Lavez-vous les mains ou les pieds l'un à l'autre en relisant Jean 13."],
+ ["e","Faites une marche de vingt minutes sans téléphone et priez à voix haute."],
+ ["e","Préparez un repas pour une personne seule ou une famille de votre église."],
+ ["e","Tenez-vous les mains et bénissez-vous l'un l'autre à voix haute."],
+ ["e","Dansez sur un chant que vous aimez tous les deux, jusqu'au bout."],
+ ["e","Lisez un chapitre des Proverbes à tour de rôle, un verset chacun."],
+ ["e","Écrivez chacun cinq qualités de l'autre et échangez vos feuilles."],
+ ["e","Regardez le coucher du soleil en nommant dix bénédictions de l'année."],
+ ["b","Dis trois choses précises pour lesquelles tu remercies Elohîm de l'avoir mis(e) sur ta route."],
+ ["b","Apprenez un verset par cœur ensemble avant dimanche."],
+ ["b","Jeûnez un repas le même jour et priez pour votre avenir."],
+ ["b","Choisissez une personne à bénir cette semaine et décidez comment."],
+ ["b","Raconte un moment où tu as été fier ou fière de lui, d'elle."],
+ ["b","Demande pardon pour une petite chose restée en suspens."]
+];
+
+const MERCI = [
+ "Remerciez Elohîm pour une qualité précise que vous voyez chez l'autre.",
+ "Dites merci pour un moment de cette semaine où vous vous êtes sentis proches.",
+ "Remerciez Elohîm pour le chemin parcouru depuis votre rencontre.",
+ "Dites merci pour une personne qui veille sur votre couple.",
+ "Remerciez Elohîm pour une prière qu'il a exaucée.",
+ "Dites merci pour ce que la distance ou le quotidien vous apprend."];
+const DEMANDE = [
+ "Priez pour la pureté et la patience dans votre relation.",
+ "Confiez à Elohîm une décision que vous devez prendre.",
+ "Priez pour la famille de l'autre, en nommant chacun.",
+ "Demandez à Elohîm de vous apprendre à mieux vous écouter.",
+ "Priez pour le travail ou les études de l'autre.",
+ "Confiez à Elohîm vos prochaines retrouvailles ou votre prochaine étape.",
+ "Priez pour un couple ami qui traverse une saison difficile.",
+ "Demandez à Elohîm de garder vos cœurs unis quand vous êtes fatigués."];
+
+const GAMES = [
+ {id:"quiz", c:"--azur",   t:"Duel biblique",        s:"Dix questions pour savoir qui connaît le mieux la Parole."},
+ {id:"coeur",c:"--ruby",   t:"À cœur ouvert",        s:"Des questions pour se parler vraiment."},
+ {id:"prier",c:"--emerald",t:"Prière à deux",        s:"Un merci, une demande, une parole."},
+ {id:"qui",  c:"--gold",   t:"Qui de nous deux ?",   s:"Désignez-vous, puis comparez vos réponses."},
+ {id:"vers", c:"--emerald",t:"Le mot manquant",      s:"Complétez les versets sans ouvrir la Bible."},
+ {id:"defi", c:"--violet", t:"Défis d'amour",        s:"Un geste concret, adapté à votre situation."},
+ {id:"mariage",c:"--ruby", t:"Avant le oui",         s:"Les vraies questions à se poser avant le mariage."}
+];
+
+const MARIAGE = [
+ "Comment imagines-tu la gestion de l'argent dans notre foyer : compte commun, comptes séparés, qui décide quoi ?",
+ "Quelle place la dîme et la générosité auront-elles dans notre budget ?",
+ "Souhaites-tu des enfants ? Combien, et quand ?",
+ "Comment aimerais-tu transmettre la foi à nos enfants ?",
+ "Quelle place nos familles auront-elles dans nos décisions de couple ?",
+ "Dans quelle église nous vois-tu servir, et comment ?",
+ "Qu'attends-tu de moi dans les tâches de la maison ?",
+ "Comment vis-tu l'attente et la pureté avant le mariage, et comment puis-je t'aider ?",
+ "Quelle blessure du passé pourrait peser sur notre mariage si nous n'en parlons pas ?",
+ "Qu'as-tu admiré, et que ne veux-tu pas reproduire, dans le couple de tes parents ?",
+ "Où aimerais-tu que nous vivions, et serais-tu prêt(e) à déménager pour l'autre ?",
+ "Comment concilier nos carrières et notre vie de famille ?",
+ "As-tu des dettes ou des engagements financiers dont je devrais être au courant ?",
+ "À qui demanderons-nous conseil quand nous traverserons une crise ?",
+ "Que signifie pour toi « quitter son père et sa mère » (Genèse 2:24) ?",
+ "Quel rythme de prière et de lecture de la Bible veux-tu pour notre foyer ?",
+ "Comment aimerais-tu que nous prenions les grandes décisions quand nous ne sommes pas d'accord ?",
+ "Qu'est-ce qui, pour toi, serait une trahison de la confiance dans un mariage ?",
+ "Quelle cérémonie de mariage te ressemble : simple, grande, traditionnelle ?",
+ "Quelles habitudes de célibataire es-tu prêt(e) à laisser derrière toi ?"
+];
+
+
+/* ---------- Outils ---------- */
+const $ = id => document.getElementById(id);
+function el(tag, props, ...kids){
+  const e = document.createElement(tag);
+  for (const k in (props||{})){
+    if (k==="class") e.className = props[k];
+    else if (k==="on") for (const ev in props.on) e.addEventListener(ev, props.on[ev]);
+    else if (k==="style") e.setAttribute("style", props[k]);
+    else if (k in e) e[k] = props[k];
+    else e.setAttribute(k, props[k]);
+  }
+  for (const c of kids) if (c!=null) e.append(c);
+  return e;
+}
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem("ctf-"+k); return v==null?d:v }catch(e){ return d } },
+  set(k,v){ try{ localStorage.setItem("ctf-"+k,v) }catch(e){} }
+};
+function hash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619) } return h>>>0 }
+function prng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296 } }
+function shuffle(arr, rnd){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+
+/* ---------- État ---------- */
+const S = { n1:store.get("n1",""), n2:store.get("n2",""), mode:store.get("mode","e"), code:store.get("code",""), premium:store.get("premium","")==="1" };
+const rounds = {};
+const names = () => [S.n1.trim()||"Joueur 1", S.n2.trim()||"Joueur 2"];
+const dist = () => S.mode==="d";
+function rndFor(id, extra){
+  const code = S.code.trim().toLowerCase();
+  if (dist() && code) return prng(hash(code+"|"+id+"|"+(rounds[id]||1)+"|"+(extra||"")));
+  return prng((Math.random()*4294967296)>>>0);
+}
+
+/* ---------- Accueil ---------- */
+function syncMode(){
+  $("m-e").setAttribute("aria-pressed", String(!dist()));
+  $("m-d").setAttribute("aria-pressed", String(dist()));
+  $("codebox").hidden = !dist();
+  $("modehint").textContent = dist()
+    ? "Chacun joue sur son appareil. Sans code, les cartes sont tirées au hasard de chaque côté."
+    : "Un seul appareil suffit : passez-le-vous à tour de rôle.";
+}
+$("n1").value=S.n1; $("n2").value=S.n2; $("code").value=S.code;
+$("n1").addEventListener("input",e=>{S.n1=e.target.value;store.set("n1",S.n1)});
+$("n2").addEventListener("input",e=>{S.n2=e.target.value;store.set("n2",S.n2)});
+$("code").addEventListener("input",e=>{S.code=e.target.value;store.set("code",S.code)});
+$("m-e").addEventListener("click",()=>{S.mode="e";store.set("mode","e");syncMode()});
+$("m-d").addEventListener("click",()=>{S.mode="d";store.set("mode","d");syncMode()});
+syncMode();
+
+const locked = g => !!g.p && !S.premium;
+function renderGames(){
+  $("games").textContent="";
+  for (const g of GAMES){
+    $("games").append(el("button",{type:"button",class:"game"+(locked(g)?" locked":""),style:"--c:var("+g.c+")",on:{click:()=>open(g)}},
+      el("span",{class:"glass","aria-hidden":"true"}),
+      el("div",null, el("strong",null,g.t, locked(g)?el("span",{class:"badge"},"Premium"):null), el("span",{class:"small muted"},g.s))));
+  }
+  $("prem").textContent = "Sept jeux, tous gratuits.";
+}
+renderGames();
+
+$("back").addEventListener("click",()=>{ $("play").hidden=true; $("home").hidden=false; window.scrollTo(0,0) });
+
+let current=null;
+function open(g){
+  current=g; rounds[g.id]=rounds[g.id]||1;
+  $("home").hidden=true; $("play").hidden=false;
+  $("play").style.setProperty("--c","var("+g.c+")");
+  $("gtitle").textContent=g.t; $("gsub").textContent=g.s;
+  start(); window.scrollTo(0,0);
+}
+function replay(){ rounds[current.id]++; start() }
+function start(){
+  $("round").textContent = "Manche "+rounds[current.id]+(dist()&&S.code.trim()?" · code "+S.code.trim():"");
+  const st=$("stage"); st.textContent="";
+  ({mariage:()=>deck(st, shuffle(MARIAGE, rndFor("mariage")), "Question", "Prenez votre temps. Une seule question bien discutée vaut mieux que dix survolées."),
+    quiz:()=>runQuiz(st,QUIZ,10,"quiz"), vers:()=>runQuiz(st,VERSETS,8,"vers"),
+    coeur:()=>runCoeur(st), qui:()=>runQui(st), defi:()=>runDefi(st), prier:()=>runPrier(st)})[current.id]();
+}
+const replayBtn = label => el("button",{type:"button",class:"btn primary",on:{click:replay}},label||"Nouvelle manche");
+
+/* ---------- Quiz et versets ---------- */
+function runQuiz(st, bank, n, id){
+  const rnd=rndFor(id), qs=shuffle(bank,rnd).slice(0,n).map(q=>({...q,o:shuffle(q.o,rnd)}));
+  const nm=names(), score=[0,0]; let i=0;
+  const show=()=>{
+    st.textContent="";
+    if (i>=qs.length) return end();
+    const q=qs[i], turn=dist()?0:i%2;
+    const scores = dist()
+      ? el("div",{class:"scores"}, el("div",{class:"score turn"}, el("b",null,String(score[0])), el("span",{class:"small muted"},"Ton score")))
+      : el("div",{class:"scores"}, ...[0,1].map(p=>el("div",{class:"score"+(p===turn?" turn":"")}, el("b",null,String(score[p])), el("span",{class:"small muted"},nm[p]+(p===turn?" · à toi":"")))));
+    const next=el("button",{type:"button",class:"btn primary",disabled:true,on:{click:()=>{i++;show()}}}, i===qs.length-1?"Voir le résultat":"Question suivante");
+    const fb=el("p",{class:"small muted"});
+    const opts=el("div",{class:"opts"});
+    q.o.forEach(o=>opts.append(el("button",{type:"button",class:"opt",on:{click:ev=>{
+      const ok=o===q.a; if(ok) score[turn]++;
+      [...opts.children].forEach(b=>{ b.disabled=true; if(b.textContent===q.a) b.classList.add("good") });
+      if(!ok) ev.currentTarget.classList.add("bad");
+      fb.textContent=(ok?"Bonne réponse. ":"La bonne réponse : "+q.a+". ")+(q.r?q.r:"");
+      next.disabled=false; next.focus();
+    }}},o)));
+    st.append(scores, el("div",{class:"card"},
+      el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length),
+      el("p",{class:"big"},q.q), opts, fb), el("div",{class:"actions"},next));
+  };
+  const end=()=>{
+    let msg, sub;
+    if (dist()){ msg=score[0]+" sur "+qs.length; sub="Annoncez vos scores l'un à l'autre. Celui qui perd choisit un verset à lire à voix haute." }
+    else {
+      const half=qs.length/2;
+      msg = score[0]===score[1] ? "Égalité, "+score[0]+" partout" : (score[0]>score[1]?nm[0]:nm[1])+" l'emporte";
+      sub = nm[0]+" : "+score[0]+" sur "+half+" · "+nm[1]+" : "+score[1]+" sur "+half+". Le perdant offre une prière au gagnant.";
+    }
+    st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},msg), el("p",{class:"muted"},sub)),
+      el("div",{class:"actions"},replayBtn()));
+  };
+  show();
+}
+
+/* ---------- Paquet de cartes générique ---------- */
+function deck(st, cards, label, hint){
+  let i=0;
+  const big=el("p",{class:"big"}), lab=el("span",{class:"label"}), h=el("p",{class:"small muted"},hint||"");
+  const next=el("button",{type:"button",class:"btn primary",on:{click:()=>{ i++; draw() }}},"Carte suivante");
+  const draw=()=>{
+    if(i>=cards.length){ big.textContent="Vous avez vu toutes les cartes de cette manche."; lab.textContent="Fin du paquet"; next.replaceWith(replayBtn("Rebattre les cartes")); return }
+    big.textContent=cards[i]; lab.textContent=label+" "+(i+1)+" sur "+cards.length;
+  };
+  st.append(el("div",{class:"card"},lab,big,h), el("div",{class:"actions"},next));
+  draw();
+}
+
+function runCoeur(st){
+  const cats=["Tout",...Object.keys(COEUR)]; let cat="Tout";
+  const chips=el("div",{class:"chips"}), zone=el("div",{class:"app",style:"gap:14px"});
+  const build=()=>{
+    chips.textContent="";
+    cats.forEach(c=>chips.append(el("button",{type:"button",class:"chip","aria-pressed":String(c===cat),on:{click:()=>{cat=c;build()}}},c)));
+    zone.textContent="";
+    const pool = cat==="Tout" ? Object.values(COEUR).flat() : COEUR[cat];
+    deck(zone, shuffle(pool, rndFor("coeur",cat)), "Carte", "Chacun répond à son tour. Celui qui écoute ne coupe pas la parole.");
+  };
+  st.append(chips, zone); build();
+}
+
+function runDefi(st){
+  const pool=DEFIS.filter(d=>d[0]==="b"||d[0]===S.mode).map(d=>d[1]);
+  deck(st, shuffle(pool, rndFor("defi",S.mode)), dist()?"Défi à distance":"Défi ensemble",
+    "Acceptez le défi ou passez à la carte suivante. Trois défis acceptés, c'est une belle semaine.");
+}
+
+/* ---------- Qui de nous deux ---------- */
+function runQui(st){
+  const qs=shuffle(QUI, rndFor("qui")).slice(0,10), nm=names(), tally=[0,0]; let i=0;
+  const show=()=>{
+    st.textContent="";
+    if(i>=qs.length){
+      const msg = tally[0]===tally[1] ? "Vous vous êtes désignés autant l'un que l'autre" : (tally[0]>tally[1]?nm[0]:nm[1])+" a été le plus désigné";
+      st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},msg),
+        el("p",{class:"muted"}, nm[0]+" : "+tally[0]+" fois · "+nm[1]+" : "+tally[1]+" fois."+(dist()?" Comparez vos écrans : avez-vous répondu pareil ?":""))),
+        el("div",{class:"actions"},replayBtn()));
+      return;
+    }
+    st.append(el("div",{class:"card"},
+      el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length),
+      el("p",{class:"big"},qs[i]),
+      el("p",{class:"small muted"}, dist()?"Choisissez chacun sur votre écran, puis annoncez votre réponse en même temps.":"Comptez jusqu'à trois et pointez du doigt. En cas de désaccord, débattez, puis tranchez."),
+      el("div",{class:"opts"}, ...[0,1].map(p=>el("button",{type:"button",class:"opt",on:{click:()=>{tally[p]++;i++;show()}}},nm[p])))));
+  };
+  show();
+}
+
+/* ---------- Prière à deux ---------- */
+function runPrier(st){
+  const rnd=rndFor("prier");
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+  const v=pick(PAROLES);
+  st.append(el("div",{class:"card"},
+    el("div",{class:"steps"},
+      el("div",null, el("span",{class:"label"},"Un merci"), el("p",null,pick(MERCI))),
+      el("div",null, el("span",{class:"label"},"Une demande"), el("p",null,pick(DEMANDE))),
+      el("div",null, el("span",{class:"label"},"Une parole"), el("blockquote",null,"« "+v[0]+" »"), el("p",{class:"small muted"},v[1]+" · Bible de Yéhoshoua ha Mashiah")))),
+    el("p",{class:"small muted"}, dist()?"Priez à voix haute pendant l'appel, l'un après l'autre, puis dites amen ensemble.":"Tenez-vous les mains. L'un commence, l'autre termine."),
+    el("div",{class:"actions"},replayBtn("Autre temps de prière")));
+}
+</script>
+
+<script>
+/* Installation : bouton affichÃ© quand le navigateur le propose, et fonctionnement hors connexion. */
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});
+(function(){
+  var offre = null, zone = document.querySelector("#home .setup");
+  var bouton = document.createElement("button");
+  bouton.type = "button"; bouton.className = "btn primary"; bouton.id = "installer";
+  bouton.textContent = "Installer l'application"; bouton.hidden = true;
+  bouton.style.alignSelf = "flex-start";
+  zone.parentNode.insertBefore(bouton, zone);
+  window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); offre = e; bouton.hidden = false; });
+  bouton.addEventListener("click", function(){ if (!offre) return; offre.prompt(); offre = null; bouton.hidden = true; });
+  window.addEventListener("appinstalled", function(){ bouton.hidden = true; });
+})();
+</script>
+</html>
