@@ -1,0 +1,17 @@
+# RESSOURCES de l'appli Corde à Trois Fils
+#
+# Une ligne = une ressource. Les cinq parties sont séparées par une barre verticale | :
+#
+#   Rubrique | Titre | Auteur ou intervenant | Quelques mots de présentation | Lien (facultatif)
+#
+# - La rubrique est libre : Livre, Podcast, Enseignement... Chaque rubrique différente crée un filtre dans l'appli.
+# - L'auteur, la présentation et le lien peuvent rester vides, mais gardez les barres | à leur place.
+# - Le lien doit commencer par https:// (page du livre, épisode du podcast, vidéo de l'enseignement).
+# - Les lignes qui commencent par # ne s'affichent pas. Les ressources apparaissent dans l'ordre du fichier.
+#
+# Les lignes ci-dessous sont des exemples pour montrer la forme : remplacez-les par vos recommandations.
+
+Livre | Les 5 langages de l'amour | Gary Chapman | Comprendre comment l'autre reçoit l'amour : paroles, moments partagés, cadeaux, services, gestes. |
+Livre | Vous avez dit oui à quoi ? | Gary Thomas | Et si le mariage servait d'abord à nous rendre saints, avant de nous rendre heureux ? |
+Podcast | À deux, le podcast du mariage chrétien | Zoé Poirrier | Des épisodes pour les célibataires, les fiancés et les couples mariés. |
+Enseignement | Titre de l'enseignement | Nom de l'intervenant | Ce que le couple y trouvera, en une phrase. | https://exemple.com/lien-vers-la-video

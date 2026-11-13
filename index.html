@@ -102,6 +102,32 @@ blockquote{margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.3
   font-family:var(--body);font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle}
 .game.locked .glass{filter:grayscale(1);opacity:.55}
 .list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+/* rubriques, ressources, espace à deux */
+button,input,textarea{font:inherit;color:inherit}
+textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);resize:vertical;min-height:76px}
+nav.seg button{padding:9px 4px;white-space:nowrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ruby);margin-left:6px;vertical-align:middle}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel > .field{flex:none}
+.res{border-left:5px solid var(--c);gap:6px}
+.res strong{font-family:var(--display);font-size:1.1rem}
+.res a{color:var(--azur);font-weight:600;align-self:flex-start}
+.duo{display:flex;gap:14px;align-items:center}
+.flame{flex:none;min-width:64px;padding:8px 10px;border-radius:12px;border:1px solid var(--gold);text-align:center;font-size:1.3rem;line-height:1.15}
+.flame b{display:block;font-family:var(--display);font-variant-numeric:tabular-nums}
+.flame.off{border-color:var(--line)}
+.flame.off span{filter:grayscale(1);opacity:.55}
+.codebig{font-family:var(--display);font-size:1.6rem;font-weight:700;letter-spacing:.08em}
+.thread{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.msg{max-width:85%;align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px 14px 14px 4px;
+  padding:8px 12px;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:6px}
+.msg.me{align-self:flex-end;background:var(--ink);color:var(--on-ink);border-color:var(--ink);border-radius:14px 14px 4px 14px}
+.msg.special{background:var(--surface);color:var(--ink);border-color:var(--line);border-left:5px solid var(--c)}
+.msg .when{font-size:.6875rem;opacity:.7}
+.msg .btn{align-self:flex-start;padding:6px 14px}
+.send{display:flex;gap:8px}
+.send input{flex:1;min-width:0}
+.answer{border-left:3px solid var(--c);padding-left:12px;overflow-wrap:anywhere}
 @media (prefers-reduced-motion:reduce){.game{transition:none}}
 </style>
 
@@ -116,6 +142,16 @@ blockquote{margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.3
         </div>
       </header>
 
+      <nav class="seg" aria-label="Rubriques">
+        <button type="button" id="t-jeux" aria-pressed="true">Jeux</button>
+        <button type="button" id="t-res" aria-pressed="false">Ressources</button>
+        <button type="button" id="t-esp" aria-pressed="false">Notre espace<span class="dot" id="esp-dot" hidden></span></button>
+      </nav>
+
+      <div class="app" id="p-res" hidden></div>
+      <div class="app" id="p-esp" style="--c:var(--ruby)" hidden></div>
+
+      <div class="app" id="p-jeux">
       <div class="setup">
         <div class="row">
           <label class="field"><span class="label">Prénom 1</span><input type="text" id="n1" maxlength="20" placeholder="Elle"></label>
@@ -140,6 +176,7 @@ blockquote{margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.3
         <h2>Choisissez un jeu</h2>
         <p class="small muted" id="prem" style="margin-bottom:10px"></p>
         <div class="games" id="games"></div>
+      </div>
       </div>
     </div>
   </section>
@@ -372,9 +409,10 @@ function shuffle(arr, rnd){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ 
 const S = { n1:store.get("n1",""), n2:store.get("n2",""), mode:store.get("mode","e"), code:store.get("code",""), premium:store.get("premium","")==="1" };
 const rounds = {};
 const names = () => [S.n1.trim()||"Joueur 1", S.n2.trim()||"Joueur 2"];
-const dist = () => S.mode==="d";
+let invite = null; /* partie lancée depuis une invitation de l'espace à deux : même tirage sur les deux appareils */
+const dist = () => S.mode==="d" || !!invite;
 function rndFor(id, extra){
-  const code = S.code.trim().toLowerCase();
+  const code = invite || S.code.trim().toLowerCase();
   if (dist() && code) return prng(hash(code+"|"+id+"|"+(rounds[id]||1)+"|"+(extra||"")));
   return prng((Math.random()*4294967296)>>>0);
 }
@@ -408,7 +446,7 @@ function renderGames(){
 }
 renderGames();
 
-$("back").addEventListener("click",()=>{ $("play").hidden=true; $("home").hidden=false; window.scrollTo(0,0) });
+$("back").addEventListener("click",()=>{ invite=null; $("play").hidden=true; $("home").hidden=false; window.scrollTo(0,0); Espace.rythme() });
 
 let current=null;
 function open(g){
@@ -416,11 +454,11 @@ function open(g){
   $("home").hidden=true; $("play").hidden=false;
   $("play").style.setProperty("--c","var("+g.c+")");
   $("gtitle").textContent=g.t; $("gsub").textContent=g.s;
-  start(); window.scrollTo(0,0);
+  start(); window.scrollTo(0,0); Espace.rythme();
 }
 function replay(){ rounds[current.id]++; start() }
 function start(){
-  $("round").textContent = "Manche "+rounds[current.id]+(dist()&&S.code.trim()?" · code "+S.code.trim():"");
+  $("round").textContent = "Manche "+rounds[current.id]+(invite?" · partie à deux":dist()&&S.code.trim()?" · code "+S.code.trim():"");
   const st=$("stage"); st.textContent="";
   ({mariage:()=>deck(st, shuffle(MARIAGE, rndFor("mariage")), "Question", "Prenez votre temps. Une seule question bien discutée vaut mieux que dix survolées."),
     quiz:()=>runQuiz(st,QUIZ,10,"quiz"), vers:()=>runQuiz(st,VERSETS,8,"vers"),
@@ -494,8 +532,8 @@ function runCoeur(st){
 }
 
 function runDefi(st){
-  const pool=DEFIS.filter(d=>d[0]==="b"||d[0]===S.mode).map(d=>d[1]);
-  deck(st, shuffle(pool, rndFor("defi",S.mode)), dist()?"Défi à distance":"Défi ensemble",
+  const mo=dist()?"d":"e", pool=DEFIS.filter(d=>d[0]==="b"||d[0]===mo).map(d=>d[1]);
+  deck(st, shuffle(pool, rndFor("defi",mo)), dist()?"Défi à distance":"Défi ensemble",
     "Acceptez le défi ou passez à la carte suivante. Trois défis acceptés, c'est une belle semaine.");
 }
 
@@ -533,6 +571,303 @@ function runPrier(st){
     el("p",{class:"small muted"}, dist()?"Priez à voix haute pendant l'appel, l'un après l'autre, puis dites amen ensemble.":"Tenez-vous les mains. L'un commence, l'autre termine."),
     el("div",{class:"actions"},replayBtn("Autre temps de prière")));
 }
+/* ---------- Ressources : lues dans le fichier ressources.txt (une ligne par ressource) ---------- */
+const Ressources = (()=>{
+  const TEINTES=["--azur","--gold","--emerald","--violet","--ruby"];
+  let liste=null, cat="Tout", charge=false;
+  function lit(txt){
+    return txt.split(/\r?\n/).map(l=>l.trim()).filter(l=>l && l[0]!=="#").map(l=>{
+      const p=l.split("|").map(x=>x.trim());
+      return {k:p[0], t:p[1], a:p[2]||"", d:p[3]||"", u:/^https?:\/\//i.test(p[4]||"")?p[4]:""};
+    }).filter(r=>r.k && r.t);
+  }
+  function peint(){
+    const z=$("p-res"); z.textContent="";
+    z.append(el("div",null, el("h2",null,"Ressources"),
+      el("p",{class:"small muted"},"Des livres, des podcasts et des enseignements pour nourrir votre couple et préparer votre mariage.")));
+    if(liste===null){ z.append(el("p",{class:"muted"},"Chargement…")); return }
+    if(!liste.length){ z.append(el("div",{class:"panel"}, el("p",{class:"muted"},"Aucune ressource pour le moment. Revenez bientôt."))); return }
+    const cats=[...new Set(liste.map(r=>r.k))];
+    if(cat!=="Tout" && !cats.includes(cat)) cat="Tout";
+    const chips=el("div",{class:"chips",style:"--c:var(--azur)"});
+    ["Tout",...cats].forEach(c=>chips.append(el("button",{type:"button",class:"chip","aria-pressed":String(c===cat),on:{click:()=>{cat=c;peint()}}},c)));
+    z.append(chips);
+    liste.filter(r=>cat==="Tout"||r.k===cat).forEach(r=>z.append(
+      el("article",{class:"panel res",style:"--c:var("+TEINTES[cats.indexOf(r.k)%TEINTES.length]+")"},
+        el("span",{class:"label"},r.k), el("strong",null,r.t),
+        r.a?el("span",{class:"small muted"},r.a):null, r.d?el("p",null,r.d):null,
+        r.u?el("a",{href:r.u,target:"_blank",rel:"noopener"},"Ouvrir"):null)));
+  }
+  async function ouvre(){
+    peint(); if(charge) return; charge=true;
+    try{ const r=await fetch("ressources.txt",{cache:"no-cache"}); liste = r.ok ? lit(await r.text()) : [] }
+    catch(e){ liste=[]; charge=false }
+    peint();
+  }
+  return {ouvre, lit};
+})();
+
+/* ---------- Espace à deux : discussion privée, invitations, défis, flamme, défi du jour ---------- */
+/* Adresse du serveur. Vide = le site qui sert cette page. Pour une copie de l'appli hébergée ailleurs,
+   indiquez l'adresse du site, par exemple "https://mon-site.onrender.com". */
+const ESPACE_API = "https://corde-a-trois-fils-ckvk.onrender.com";
+const DEFIS_DUO = [
+ "Envoie-moi une photo de ce que tu vois par ta fenêtre, avec un merci à Elohîm.",
+ "Écris-moi trois choses que tu aimes chez moi, sans réfléchir plus d'une minute.",
+ "Choisis un verset pour ma journée de demain et dis-moi pourquoi.",
+ "Envoie-moi un message vocal de trente secondes où tu me bénis.",
+ "Raconte-moi le meilleur moment de ta journée en cinq phrases.",
+ "Prie pour moi à midi et dis-moi ce que tu as demandé.",
+ "Envoie-moi le chant de louange qui t'accompagne cette semaine.",
+ "Dis-moi une chose que je peux faire cette semaine pour te faciliter la vie.",
+ "Lis le Psaume 121 ce soir et écris-moi le verset que tu gardes.",
+ "Rappelle-moi un souvenir de nous qui te fait sourire.",
+ "Apprends un verset par cœur aujourd'hui et récite-le-moi à notre prochain appel.",
+ "Écris-moi la prière que tu fais pour notre avenir."
+];
+const DEFI_JOUR = [
+ "Donne une raison précise de remercier Elohîm pour l'autre aujourd'hui.",
+ "Quel verset garderais-tu pour notre couple cette semaine ?",
+ "Quel a été le meilleur moment de ta journée ?",
+ "Pour quoi veux-tu que je prie pour toi ce soir ?",
+ "Qu'est-ce qui t'a fait penser à moi aujourd'hui ?",
+ "Qu'est-ce qui t'a le plus manqué de moi aujourd'hui ?",
+ "Cite une chose que tu as apprise sur Elohîm récemment.",
+ "Qu'aimerais-tu que nous fassions à nos prochaines retrouvailles ?",
+ "Quel petit geste de ma part t'a touché(e) dernièrement ?",
+ "Qu'est-ce qui te pèse en ce moment et que nous pourrions porter à deux ?",
+ "Quel chant résume ta journée ?",
+ "De quoi es-tu fier ou fière cette semaine ?",
+ "Quelle parole d'encouragement as-tu besoin d'entendre aujourd'hui ?",
+ "Décris notre couple en trois mots.",
+ "Quel souvenir de nous t'est revenu récemment ?",
+ "Que peux-tu confier à Elohîm aujourd'hui au lieu de t'en inquiéter ?",
+ "Qu'as-tu lu dans la Bible aujourd'hui, ou qu'aimerais-tu lire ?",
+ "Quelle est la chose la plus drôle qui te soit arrivée cette semaine ?",
+ "Comment puis-je mieux t'aimer cette semaine ?",
+ "Quel rêve aimerais-tu que nous réalisions ensemble ?",
+ "Pour qui pourrions-nous prier ensemble aujourd'hui ?"
+];
+
+const Espace = (()=>{
+  let E; try{ E=JSON.parse(store.get("espace","")||"{}")||{} }catch(e){ E={} }
+  let V=null, minuterie=null, enCours=false, U=null, sigJour="", sigFil="", tiroir="";
+  const garde=()=>store.set("espace",JSON.stringify(E));
+  function appareil(){
+    let d=store.get("device","");
+    if(!d){ d=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+"-"+Math.random().toString(36).slice(2,12); store.set("device",d) }
+    return d;
+  }
+  async function appel(chemin, corps){
+    let r;
+    try{ r=await fetch(ESPACE_API+"/api/espace"+chemin,{method:corps?"POST":"GET",
+      headers:Object.assign(corps?{"Content-Type":"application/json"}:{}, E.token?{Authorization:"Bearer "+E.token}:{}),
+      body:corps?JSON.stringify(corps):undefined}) }
+    catch(e){ throw new Error("Connexion impossible. Vérifiez votre réseau, puis réessayez.") }
+    const j=await r.json().catch(()=>null);
+    if(!r.ok||!j){ const err=new Error((j&&j.error)||"L'espace à deux n'est pas disponible pour le moment."); err.statut=r.status; throw err }
+    return j;
+  }
+  const dit=(t,bad)=>{ if(U&&U.msg){ U.msg.textContent=t||""; U.msg.style.color=bad?"var(--ko)":"" } };
+
+  /* --- Synchronisation --- */
+  async function synchro(){
+    if(!E.token||enCours) return; enCours=true;
+    try{
+      let v=await appel("?apres="+(E.apres||0));
+      if(v.epoque!==E.epoque){
+        /* le serveur a perdu ou recréé l'espace : on lui renvoie notre copie, puis on repart de zéro */
+        if(v.aRestaurer && E.epoque) await appel("/restaurer",{nom:E.nom||"",messages:E.messages||[],flamme:E.fl||null,defi:E.defi||null});
+        E.epoque=v.epoque; E.apres=0; E.messages=[];
+        v=await appel("?apres=0");
+      }
+      const recus=v.messages.filter(m=>m.de!==v.moi).length;
+      if(v.messages.length){ E.messages=(E.messages||[]).concat(v.messages).slice(-150); E.apres=E.messages[E.messages.length-1].id }
+      const faits=new Set(v.releves); (E.messages||[]).forEach(m=>{ if(m.type==="defi") m.fait=faits.has(m.id) });
+      E.fl=v.fl; E.defi={jour:v.jour,moi:v.defi.moi}; E.code=v.code; garde();
+      V=v;
+      if(recus && (S.onglet!=="esp" || !$("play").hidden)) $("esp-dot").hidden=false;
+      if(S.onglet==="esp"){ peint(); if(U&&U.msg&&U.msg.dataset.reseau){ dit(""); delete U.msg.dataset.reseau } }
+    }catch(e){
+      if(e.statut===401){ clearInterval(minuterie); minuterie=null; perdu(e.message) }
+      else if(S.onglet==="esp"&&U&&U.msg){ dit(e.message,true); U.msg.dataset.reseau="1" }
+    }finally{ enCours=false }
+  }
+  function rythme(){
+    clearInterval(minuterie); minuterie=null;
+    const ici=S.onglet==="esp" && $("play").hidden;
+    if(ici){ $("esp-dot").hidden=true; dessine() }
+    if(!E.token||document.hidden) return;
+    minuterie=setInterval(synchro, ici?4000:30000);
+    if(ici) synchro();
+  }
+  document.addEventListener("visibilitychange",rythme);
+
+  /* --- Écrans --- */
+  function dessine(){
+    const z=$("p-esp");
+    if(!E.token){ U=null; z.textContent=""; return accueil(z) }
+    if(U&&U.monte) return peint();
+    z.textContent=""; sigJour=sigFil=""; tiroir="";
+    U={monte:true, tete:el("div",{class:"panel"}), inv:el("div",{class:"panel",hidden:true}), jour:el("div",{class:"panel",style:"border-top:6px solid var(--c)"}),
+      fil:el("div",{class:"thread","aria-live":"polite"}), tiroir:el("div",{hidden:true}), msg:el("p",{class:"small",role:"status"})};
+    const champ=el("input",{type:"text",maxLength:500,placeholder:"Écrire un message…","aria-label":"Votre message",autocomplete:"off"});
+    const part=async()=>{ const t=champ.value.trim(); if(!t) return; champ.value=""; if(!(await envoie("/message",{type:"texte",texte:t}))) champ.value=t };
+    champ.addEventListener("keydown",e=>{ if(e.key==="Enter") part() });
+    z.append(U.tete, U.inv, U.jour,
+      el("div",{class:"panel"}, el("h2",null,"Notre discussion"), U.fil,
+        el("div",{class:"send"}, champ, el("button",{type:"button",class:"btn primary",on:{click:part}},"Envoyer")),
+        el("div",{class:"actions"},
+          el("button",{type:"button",class:"btn",on:{click:()=>ouvreTiroir("jeu")}},"Inviter à un jeu"),
+          el("button",{type:"button",class:"btn",on:{click:()=>ouvreTiroir("defi")}},"Lancer un défi")),
+        U.tiroir, U.msg),
+      el("div",{class:"actions"}, el("button",{type:"button",class:"btn",on:{click:quitte}},"Quitter cet espace sur cet appareil")));
+    peint();
+  }
+  function accueil(z, alerte){
+    const nom=el("input",{type:"text",maxLength:20,placeholder:"Votre prénom",value:E.nom||S.n1||""});
+    const code=el("input",{type:"text",maxLength:12,placeholder:"ABCD-EFGH",autocomplete:"off",style:"text-transform:uppercase"});
+    const msg=el("p",{class:"small",role:"status"},alerte||""); if(alerte) msg.style.color="var(--ko)";
+    const entre=async(chemin,corps)=>{
+      if(!nom.value.trim()){ msg.textContent="Indiquez votre prénom."; msg.style.color="var(--ko)"; nom.focus(); return }
+      msg.style.color=""; msg.textContent="Un instant…";
+      try{
+        const j=await appel(chemin,Object.assign({device:appareil(),nom:nom.value.trim()},corps));
+        E={token:j.token,code:j.code,nom:nom.value.trim(),epoque:j.epoque,apres:0,messages:[]}; garde(); rythme();
+      }catch(e){ msg.textContent=e.message; msg.style.color="var(--ko)" }
+    };
+    code.addEventListener("keydown",e=>{ if(e.key==="Enter") entre("/rejoindre",{code:code.value}) });
+    z.append(
+      el("div",null, el("h2",null,"Notre espace"),
+        el("p",{class:"small muted"},"Un coin privé pour vous deux, même à distance : discutez, invitez-vous à un jeu, lancez-vous des défis, relevez le défi du jour et entretenez votre flamme.")),
+      el("div",{class:"panel"}, el("label",{class:"field"}, el("span",{class:"label"},"Votre prénom"), nom)),
+      el("div",{class:"panel"}, el("span",{class:"label"},"Vous êtes le premier"),
+        el("p",null,"Créez l'espace, puis envoyez le code d'invitation à votre partenaire."),
+        el("div",{class:"actions"}, el("button",{type:"button",class:"btn primary",on:{click:()=>entre("/creer",{})}},"Créer notre espace"))),
+      el("div",{class:"panel"}, el("span",{class:"label"},"Votre partenaire vous a invité"),
+        el("label",{class:"field"}, el("span",{class:"label"},"Code d'invitation"), code),
+        el("div",{class:"actions"}, el("button",{type:"button",class:"btn",on:{click:()=>entre("/rejoindre",{code:code.value})}},"Rejoindre"))),
+      msg,
+      el("p",{class:"small muted"},"L'espace est réservé à deux appareils : le vôtre et celui de votre partenaire. Personne d'autre ne peut y entrer."));
+  }
+  function perdu(texte){ E={nom:E.nom}; garde(); V=null; U=null; if(S.onglet==="esp"){ const z=$("p-esp"); z.textContent=""; accueil(z,texte) } }
+  function quitte(){
+    if(!confirm("Quitter cet espace sur cet appareil ? Votre partenaire garde la discussion. Vous pourrez revenir avec le code d'invitation.")) return;
+    clearInterval(minuterie); minuterie=null; E={nom:E.nom}; garde(); V=null; U=null; dessine();
+  }
+  const codeJoli=c=>c?c.slice(0,4)+"-"+c.slice(4):"";
+  const quand=t=>{ const d=new Date(t), h=d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+    return d.toDateString()===new Date().toDateString()?h:d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" · "+h };
+
+  function peint(){
+    if(!U||!U.monte) return;
+    const v=V, moi=v?v.moi:0, autre=v&&v.noms[1-moi]||"", lui=autre||"votre partenaire";
+    /* en-tête : flamme */
+    const n=v?v.flamme:0;
+    U.tete.textContent="";
+    U.tete.append(el("div",{class:"duo"},
+      el("div",{class:"flame"+(n?"":" off"),"aria-label":n+" jour"+(n>1?"s":"")+" de flamme"}, el("span",{"aria-hidden":"true"},"🔥"), el("b",null,String(n))),
+      el("div",null, el("h2",null, autre?"Vous et "+autre:"Notre espace"),
+        el("p",{class:"small muted"}, !v?"Connexion…"
+          : !n ? "Écrivez-vous tous les deux dans la même journée pour allumer votre flamme."
+          : v.allumee ? n+" jour"+(n>1?"s":"")+" d'affilée. Flamme entretenue aujourd'hui."
+          : n+" jour"+(n>1?"s":"")+" d'affilée. "+(v.actif[moi]?"Au tour de "+lui+" d'écrire aujourd'hui.":"Écrivez-vous aujourd'hui pour la garder.")))));
+    if(!v) return;
+    /* invitation du partenaire */
+    U.inv.hidden=v.complet;
+    if(!v.complet && !U.inv.firstChild){
+      const etat=el("span",{class:"small muted",role:"status"});
+      const texte="Rejoins-moi sur Corde à Trois Fils, rubrique « Notre espace ». Code d'invitation : "+codeJoli(v.code);
+      U.inv.append(el("span",{class:"label"},"Invitez votre partenaire"), el("p",{class:"codebig"},codeJoli(v.code)),
+        el("p",{class:"small muted"},"Envoyez-lui ce code. Il ou elle ouvre l'appli, rubrique « Notre espace », et choisit « Rejoindre ». Dès que vous êtes deux, l'espace se ferme aux autres."),
+        el("div",{class:"actions"},
+          el("button",{type:"button",class:"btn primary",on:{click:async()=>{ try{ await navigator.clipboard.writeText(codeJoli(v.code)); etat.textContent="Code copié." }catch(e){ etat.textContent="Copie impossible : notez le code." } }}},"Copier le code"),
+          navigator.share?el("button",{type:"button",class:"btn",on:{click:()=>navigator.share({text:texte}).catch(()=>{})}},"Partager"):null),
+        etat);
+    }
+    /* défi du jour */
+    const sj=[v.jour,v.defi.moi,v.defi.autreFait,v.defi.autre,autre].join("|");
+    if(sj!==sigJour){
+      sigJour=sj; U.jour.textContent="";
+      const q=DEFI_JOUR[Math.floor(Date.parse(v.jour+"T00:00:00Z")/86400000)%DEFI_JOUR.length];
+      U.jour.append(el("span",{class:"label"},"Défi du jour, à relever ensemble"), el("p",{class:"big",style:"font-family:var(--display);font-size:1.25rem;line-height:1.25"},q));
+      if(!v.defi.moi){
+        const rep=el("textarea",{maxLength:500,placeholder:"Votre réponse…","aria-label":"Votre réponse au défi du jour"});
+        U.jour.append(rep,
+          el("p",{class:"small muted"}, v.defi.autreFait?(autre||"Votre partenaire")+" a déjà répondu. Sa réponse s'affichera après la vôtre.":"Vos deux réponses se dévoilent quand vous avez répondu tous les deux."),
+          el("div",{class:"actions"}, el("button",{type:"button",class:"btn primary",on:{click:()=>{ if(rep.value.trim()) envoie("/jour",{texte:rep.value.trim()}) }}},"Envoyer ma réponse")));
+      }else{
+        U.jour.append(el("div",{class:"answer"}, el("span",{class:"label"},"Vous"), el("p",null,v.defi.moi)));
+        if(v.defi.autre) U.jour.append(el("div",{class:"answer"}, el("span",{class:"label"},autre||"Votre partenaire"), el("p",null,v.defi.autre)),
+          el("p",{class:"small muted"},"Défi du jour relevé ensemble. Rendez-vous demain pour le suivant."));
+        else U.jour.append(el("p",{class:"small muted"},"En attente de la réponse de "+lui+"."));
+      }
+    }
+    /* fil de discussion */
+    const ms=E.messages||[], sf=ms.length+"|"+(ms.length?ms[ms.length-1].id:0)+"|"+ms.filter(m=>m.fait).length+"|"+moi+"|"+autre;
+    if(sf!==sigFil){
+      const bas=!sigFil || U.fil.scrollHeight-U.fil.scrollTop-U.fil.clientHeight<60 || (ms.length&&ms[ms.length-1].de===moi);
+      sigFil=sf; U.fil.textContent="";
+      if(!ms.length) U.fil.append(el("p",{class:"small muted"},"Dites-vous bonjour. Ce qui s'écrit ici n'est visible que de vous deux."));
+      ms.forEach(m=>{
+        const mien=m.de===moi, qui=mien?"Vous":(autre||"Votre partenaire");
+        const b=el("div",{class:"msg"+(mien?" me":"")+(m.type!=="texte"?" special":"")});
+        if(m.type==="jeu"){
+          const g=GAMES.find(x=>x.id===m.jeu);
+          b.style.setProperty("--c","var("+(g?g.c:"--azur")+")");
+          b.append(el("span",{class:"label"},mien?"Vous invitez à jouer":qui+" vous invite à jouer"), el("strong",null,g?g.t:"Un jeu"),
+            g?el("button",{type:"button",class:"btn primary",on:{click:()=>{ invite=m.graine; rounds[g.id]=1; open(g) }}},"Jouer"):null);
+        }else if(m.type==="defi"){
+          b.style.setProperty("--c","var(--violet)");
+          b.append(el("span",{class:"label"},mien?"Votre défi":"Défi de "+qui), el("span",null,m.texte),
+            m.fait?el("span",{class:"small",style:"color:var(--ok);font-weight:600"},"Défi relevé")
+            : mien?el("span",{class:"small muted"},"En attente")
+            : el("button",{type:"button",class:"btn primary",on:{click:()=>envoie("/releve",{id:m.id})}},"Défi relevé"));
+        }else b.append(el("span",null,m.texte));
+        b.append(el("span",{class:"when"},quand(m.t)));
+        U.fil.append(b);
+      });
+      if(bas) U.fil.scrollTop=U.fil.scrollHeight;
+    }
+  }
+  function ouvreTiroir(quoi){
+    const t=U.tiroir; t.textContent="";
+    if(tiroir===quoi){ tiroir=""; t.hidden=true; return }
+    tiroir=quoi; t.hidden=false;
+    const ferme=()=>{ tiroir=""; t.hidden=true; t.textContent="" };
+    if(quoi==="jeu"){
+      const chips=el("div",{class:"chips"});
+      GAMES.forEach(g=>chips.append(el("button",{type:"button",class:"chip",on:{click:async()=>{ if(await envoie("/message",{type:"jeu",jeu:g.id})) ferme() }}},g.t+(locked(g)?" (Premium)":""))));
+      t.append(el("div",{class:"panel",style:"background:var(--bg)"}, el("span",{class:"label"},"Quel jeu ?"), chips,
+        el("p",{class:"small muted"},"Vous recevrez tous les deux les mêmes cartes et les mêmes questions.")));
+    }else{
+      let i=Math.floor(Math.random()*DEFIS_DUO.length);
+      const zone=el("textarea",{maxLength:500,"aria-label":"Texte du défi",value:DEFIS_DUO[i]});
+      t.append(el("div",{class:"panel",style:"background:var(--bg)"}, el("span",{class:"label"},"Votre défi"), zone,
+        el("p",{class:"small muted"},"Gardez cette idée, tirez-en une autre ou écrivez la vôtre."),
+        el("div",{class:"actions"},
+          el("button",{type:"button",class:"btn",on:{click:()=>{ i=(i+1)%DEFIS_DUO.length; zone.value=DEFIS_DUO[i] }}},"Une autre idée"),
+          el("button",{type:"button",class:"btn primary",on:{click:async()=>{ if(zone.value.trim() && await envoie("/message",{type:"defi",texte:zone.value.trim()})) ferme() }}},"Envoyer le défi"))));
+    }
+  }
+  async function envoie(chemin,corps){
+    dit("");
+    try{ await appel(chemin,corps); await synchro(); return true }
+    catch(e){ if(e.statut===401) perdu(e.message); else dit(e.message,true); return false }
+  }
+  return {rythme};
+})();
+
+/* ---------- Rubriques ---------- */
+const ONGLETS=["jeux","res","esp"];
+function onglet(o){
+  S.onglet=o; store.set("onglet",o);
+  ONGLETS.forEach(k=>{ $("t-"+k).setAttribute("aria-pressed",String(k===o)); $("p-"+k).hidden=k!==o });
+  if(o==="res") Ressources.ouvre();
+  Espace.rythme();
+}
+ONGLETS.forEach(k=>$("t-"+k).addEventListener("click",()=>onglet(k)));
+onglet(ONGLETS.includes(store.get("onglet",""))?store.get("onglet",""):"jeux");
 </script>
 
 <script>
