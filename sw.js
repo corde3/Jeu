@@ -1,6 +1,6 @@
 // Garde l'application et sa banque de questions disponibles hors connexion.
 // Changez le numéro ci-dessous pour forcer une mise à jour chez tous les joueurs.
-const CACHE = "ctf-v3";
+const CACHE = "ctf-v4";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "ressources.txt",
   "donnees/quiz.txt", "donnees/versets.txt", "donnees/coeur.txt", "donnees/qui.txt", "donnees/defis.txt", "donnees/mariage.txt"];
 

@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Des jeux pour couples chrétiens, à jouer ensemble ou à distance.">
-<meta name="theme-color" content="#11152A">
+<meta name="theme-color" content="#6E1423">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,34 +15,40 @@
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Corde à Trois Fils</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Parisienne&family=Figtree:wght@400;500;600&display=swap">
 <style>
-/* Layout : une colonne étroite façon appli mobile. Accueil = réglages du couple + grille de jeux
-   marqués chacun par un éclat de vitrail ; écran de jeu = une seule carte centrale et ses actions. */
+/* Layout : une colonne étroite façon appli mobile. Accueil = bandeau de couverture bordeaux et or,
+   rubriques, réglages du couple + liste de jeux numérotés ; écran de jeu = une carte centrale et ses actions.
+   Palette : bordeaux, or, blanc. Les teintes --ruby, --azur, --emerald, --violet déclinent le bordeaux et l'or. */
 :root{
-  --bg:#ECEEF5; --surface:#FFFFFF; --ink:#1A2042; --muted:#5A6283; --line:#D3D8E7;
-  --ruby:#B3264A; --gold:#B87D0E; --azur:#2B5FB8; --emerald:#1C7A63; --violet:#6B3FA0;
-  --ok:#1C7A63; --ko:#B3264A; --on-ink:#FFFFFF;
-  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --bg:#FAF6F0; --surface:#FFFFFF; --ink:#2B1418; --muted:#6F5B5D; --line:#E7DDD0;
+  --brand:#6E1423; --on-brand:#FFFFFF; --rose:#B8405A;
+  --ruby:#8A1F33; --gold:#8F6B14; --azur:#8A1F33; --emerald:#8C6A1A; --violet:#5B1020;
+  --ok:#2F6B4A; --ko:#B3261E; --on-ink:#FFFFFF;
+  --display:"Playfair Display",Georgia,"Times New Roman",serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --r:14px;
+  --r:12px; --shadow:0 1px 2px rgba(74,13,24,.06),0 10px 28px rgba(74,13,24,.08);
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#11152A; --surface:#1B2040; --ink:#ECEEF8; --muted:#A3AAC8; --line:#30375E;
-  --ruby:#F2728F; --gold:#E9B64F; --azur:#82AAF3; --emerald:#62CFB1; --violet:#B997EA;
-  --ok:#62CFB1; --ko:#F2728F; --on-ink:#11152A; color-scheme:dark } }
+  --bg:#170A0C; --surface:#261114; --ink:#F8F1E7; --muted:#C9B4AE; --line:#4B2B2E;
+  --brand:#E0BB62; --on-brand:#1E0B0E; --rose:#F29BAC;
+  --ruby:#E0808F; --gold:#E0BB62; --azur:#E0808F; --emerald:#D2AE5E; --violet:#C9566A;
+  --ok:#7CC79A; --ko:#F0857C; --on-ink:#170A0C;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28); color-scheme:dark } }
 :root[data-theme="dark"]{
-  --bg:#11152A; --surface:#1B2040; --ink:#ECEEF8; --muted:#A3AAC8; --line:#30375E;
-  --ruby:#F2728F; --gold:#E9B64F; --azur:#82AAF3; --emerald:#62CFB1; --violet:#B997EA;
-  --ok:#62CFB1; --ko:#F2728F; --on-ink:#11152A; color-scheme:dark }
+  --bg:#170A0C; --surface:#261114; --ink:#F8F1E7; --muted:#C9B4AE; --line:#4B2B2E;
+  --brand:#E0BB62; --on-brand:#1E0B0E; --rose:#F29BAC;
+  --ruby:#E0808F; --gold:#E0BB62; --azur:#E0808F; --emerald:#D2AE5E; --violet:#C9566A;
+  --ok:#7CC79A; --ko:#F0857C; --on-ink:#170A0C;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.28); color-scheme:dark }
 
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;font-variant-numeric:lining-nums;
   padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .app{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
 h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.1}
-h1{font-size:clamp(2rem,8vw,2.9rem);font-weight:700;letter-spacing:-.02em}
-h2{font-size:1.15rem;font-weight:700}
+h1{font-size:clamp(1.8rem,7.4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.25rem;font-weight:700}
 p{margin:0}
 .muted{color:var(--muted)}
 .small{font-size:.875rem}
@@ -50,37 +56,48 @@ p{margin:0}
 button,input{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--azur);outline-offset:2px}
 
-/* éclat de vitrail */
-.glass{width:44px;height:44px;flex:none;border-radius:10px;
-  background:conic-gradient(from 35deg,var(--c) 0 28%,color-mix(in srgb,var(--c) 55%,var(--surface)) 0 52%,color-mix(in srgb,var(--c) 80%,var(--ink)) 0 71%,color-mix(in srgb,var(--c) 30%,var(--surface)) 0);
-  box-shadow:inset 0 0 0 2px var(--ink)}
-.hero{display:flex;gap:16px;align-items:center}
-.hero .glass{width:64px;height:64px;border-radius:50% 50% 10px 10px;--c:var(--ruby);
-  background:conic-gradient(from 20deg,var(--ruby) 0 20%,var(--gold) 0 40%,var(--azur) 0 60%,var(--emerald) 0 80%,var(--violet) 0)}
+/* pastille numérotée de chaque jeu */
+.glass{width:46px;height:46px;flex:none;border-radius:10px;display:grid;place-items:center;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--c) 86%,#fff),color-mix(in srgb,var(--c) 78%,#000));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.22),inset 0 0 0 3px rgba(0,0,0,.06);
+  color:var(--on-ink);font-family:var(--display);font-weight:700;font-size:1rem;letter-spacing:.02em}
+.games{counter-reset:jeu}
+.game{counter-increment:jeu}
+.game .glass::after{content:counter(jeu,upper-roman)}
+/* bandeau de couverture : bordeaux, double filet or */
+.hero{display:flex;gap:16px;align-items:center;position:relative;padding:24px 20px;border-radius:16px;color:#FFF8EE;
+  background:radial-gradient(130% 150% at 0% 0%,#8E2237 0%,#6E1423 46%,#450C16 100%);
+  box-shadow:inset 0 0 0 1px rgba(224,187,98,.7),var(--shadow)}
+.hero::after{content:"";position:absolute;inset:6px;border:1px solid rgba(224,187,98,.4);border-radius:11px;pointer-events:none}
+.hero h1{color:#FFFFFF}
+.hero .muted{color:#EBD9C4}
+.hero .small{color:#E0BB62;white-space:nowrap}
+.emblem{width:64px;height:64px;flex:none}
 
-.setup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px}
+.setup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
 .row{display:flex;gap:12px;flex-wrap:wrap}
 .field{flex:1 1 140px;min-width:0;display:flex;flex-direction:column;gap:4px}
 input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 .seg{display:flex;border:1px solid var(--line);border-radius:12px;padding:3px;background:var(--bg);gap:3px}
 .seg button{flex:1;border:0;background:transparent;padding:9px 8px;border-radius:9px;font-weight:600;cursor:pointer;color:var(--muted)}
-.seg button[aria-pressed=true]{background:var(--ink);color:var(--on-ink)}
+.seg button[aria-pressed=true]{background:var(--brand);color:var(--on-brand)}
 
 .games{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .game{display:flex;gap:14px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--r);padding:14px;cursor:pointer;transition:transform .12s,border-color .12s}
-.game:hover{border-color:var(--c);transform:translateY(-1px)}
+  border-radius:var(--r);padding:14px;cursor:pointer;transition:transform .12s,border-color .12s;box-shadow:var(--shadow)}
+.game:hover{border-color:var(--gold);transform:translateY(-1px)}
+.game:active,.btn:active,.opt:active:not(:disabled),.chip:active{transform:scale(.975)}
 .game div{min-width:0}
 .game strong{font-family:var(--display);font-size:1.05rem;display:block}
 
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.btn{border:1px solid var(--line);background:var(--surface);padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer}
-.btn.primary{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--surface);padding:10px 18px;border-radius:999px;font-weight:600;cursor:pointer;transition:transform .1s}
+.btn.primary{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
 .btn:disabled{opacity:.45;cursor:default}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 
-.card{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--c);border-radius:var(--r);
-  padding:24px 20px;display:flex;flex-direction:column;gap:16px;min-height:220px}
+.card{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:var(--r);
+  padding:26px 22px;display:flex;flex-direction:column;gap:16px;min-height:220px;box-shadow:var(--shadow)}
 .card .big{font-family:var(--display);font-size:clamp(1.3rem,5vw,1.7rem);font-weight:500;line-height:1.25;text-wrap:balance}
 .opts{display:grid;gap:8px}
 .opt{text-align:left;border:1px solid var(--line);background:var(--bg);padding:12px 14px;border-radius:10px;cursor:pointer;font-weight:500}
@@ -93,7 +110,7 @@ input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line);borde
 .scores{display:flex;gap:10px}
 .score{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}
 .score.turn{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
-.score b{font-family:var(--display);font-size:1.5rem;font-variant-numeric:tabular-nums;display:block}
+.score b{font-family:var(--display);font-size:1.5rem;font-variant-numeric:lining-nums tabular-nums;display:block}
 .score span{display:block;overflow-wrap:anywhere}
 .steps{display:flex;flex-direction:column;gap:14px}
 .steps > div{border-left:3px solid var(--c);padding-left:12px}
@@ -102,6 +119,7 @@ blockquote{margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.3
   font-family:var(--body);font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;vertical-align:middle}
 .game.locked .glass{filter:grayscale(1);opacity:.55}
 .list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+
 /* rubriques, ressources, espace à deux */
 button,input,textarea{font:inherit;color:inherit}
 textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);resize:vertical;min-height:76px}
@@ -114,31 +132,77 @@ nav.seg button{padding:9px 4px;white-space:nowrap}
 .res a{color:var(--azur);font-weight:600;align-self:flex-start}
 .duo{display:flex;gap:14px;align-items:center}
 .flame{flex:none;min-width:64px;padding:8px 10px;border-radius:12px;border:1px solid var(--gold);text-align:center;font-size:1.3rem;line-height:1.15}
-.flame b{display:block;font-family:var(--display);font-variant-numeric:tabular-nums}
+.flame b{display:block;font-family:var(--display);font-variant-numeric:lining-nums tabular-nums}
 .flame.off{border-color:var(--line)}
 .flame.off span{filter:grayscale(1);opacity:.55}
 .codebig{font-family:var(--display);font-size:1.6rem;font-weight:700;letter-spacing:.08em}
 .thread{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
 .msg{max-width:85%;align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px 14px 14px 4px;
   padding:8px 12px;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:6px}
-.msg.me{align-self:flex-end;background:var(--ink);color:var(--on-ink);border-color:var(--ink);border-radius:14px 14px 4px 14px}
+.msg.me{align-self:flex-end;background:var(--brand);color:var(--on-brand);border-color:var(--brand);border-radius:14px 14px 4px 14px}
 .msg.special{background:var(--surface);color:var(--ink);border-color:var(--line);border-left:5px solid var(--c)}
 .msg .when{font-size:.6875rem;opacity:.7}
 .msg .btn{align-self:flex-start;padding:6px 14px}
 .send{display:flex;gap:8px}
 .send input{flex:1;min-width:0}
 .answer{border-left:3px solid var(--c);padding-left:12px;overflow-wrap:anywhere}
-@media (prefers-reduced-motion:reduce){.game{transition:none}}
+
+/* touches romantiques et interactions : cœurs, écriture manuscrite, cartes à retourner */
+.script{font-family:"Parisienne","Segoe Script","Brush Script MT",cursive;font-size:1.55rem;line-height:1.15;color:#F3C9D0}
+.hero{overflow:hidden}
+.hero > *{position:relative;z-index:1}
+.hero::after{z-index:1}
+.hero .hearts{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hearts i{position:absolute;bottom:-24px;font-style:normal;color:#F3C9D0;opacity:0;animation:flotte 9s linear infinite}
+.hearts i::before{content:"♥"}
+.hearts i:nth-child(1){left:6%;font-size:14px}
+.hearts i:nth-child(2){left:26%;font-size:20px;animation-delay:2.2s;color:#E0BB62}
+.hearts i:nth-child(3){left:48%;font-size:12px;animation-delay:4.1s}
+.hearts i:nth-child(4){left:65%;font-size:18px;animation-delay:1.3s}
+.hearts i:nth-child(5){left:81%;font-size:13px;animation-delay:5.6s;color:#E0BB62}
+.hearts i:nth-child(6){left:92%;font-size:16px;animation-delay:3.4s}
+@keyframes flotte{0%{transform:translateY(0);opacity:0}15%{opacity:.4}80%{opacity:.25}100%{transform:translateY(-240px);opacity:0}}
+#depuis{color:#E0BB62;margin-top:4px}
+input[type=date]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-height:44px}
+.burst{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}
+.burst i{position:absolute;bottom:-40px;font-style:normal;color:var(--rose);opacity:0;animation:monte 1.9s ease-out forwards}
+.burst i:nth-child(3n){color:var(--gold)}
+@keyframes monte{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(-88vh) scale(1.2) rotate(18deg);opacity:0}}
+.prog{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--gold));border-radius:999px}
+.flipcard{position:relative;cursor:pointer}
+.flipcard .dos{position:absolute;inset:-3px -1px -1px;border-radius:var(--r);display:none;place-items:center;align-content:center;gap:8px;text-align:center;padding:20px;
+  background:radial-gradient(130% 150% at 0% 0%,#8E2237 0%,#6E1423 46%,#450C16 100%);
+  box-shadow:inset 0 0 0 1px rgba(224,187,98,.75),inset 0 0 0 7px #5A1020,inset 0 0 0 8px rgba(224,187,98,.4)}
+.flipcard .dos svg{width:70px;height:70px}
+.flipcard .dos small{color:#EBD9C4;font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.flipcard.cache .dos{display:grid}
+.flipcard.cache > :not(.dos){visibility:hidden}
+.flipcard.tourne{animation:retourne .55s cubic-bezier(.2,.7,.2,1)}
+@keyframes retourne{from{transform:perspective(900px) rotateY(88deg)}to{transform:perspective(900px) rotateY(0)}}
+.msg.coeur,.msg.coeur.me{background:transparent;border:0;padding:0;font-size:2.6rem;line-height:1.1;color:var(--rose)}
+@media (prefers-reduced-motion:reduce){.game,.btn{transition:none}.hearts,.burst{display:none}.flipcard.tourne{animation:none}}
 </style>
 
 <div class="app">
   <section id="home">
     <div class="app">
       <header class="hero">
-        <div class="glass" aria-hidden="true"></div>
+        <div class="hearts" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <svg class="emblem" viewBox="0 0 100 100" aria-hidden="true">
+          <defs><clipPath id="coeur-clip"><path d="M50,88 C20,66 6,48 6,30 C6,16 17,6 30,6 C39,6 46,11 50,19 C54,11 61,6 70,6 C83,6 94,16 94,30 C94,48 80,66 50,88 Z"/></clipPath></defs>
+          <path d="M50,88 C20,66 6,48 6,30 C6,16 17,6 30,6 C39,6 46,11 50,19 C54,11 61,6 70,6 C83,6 94,16 94,30 C94,48 80,66 50,88 Z" fill="rgba(255,255,255,.07)" stroke="#E0BB62" stroke-width="3.5" stroke-linejoin="round"/>
+          <g clip-path="url(#coeur-clip)" fill="none" stroke-width="5.5" stroke-linecap="round">
+            <path stroke="#F3C9D0" d="M2,40 h96"/>
+            <path stroke="#FFF8EE" d="M2,40 q8,24 16,0 t16,0 t16,0 t16,0 t16,0 t16,0"/>
+            <path stroke="#E0BB62" d="M2,40 q8,-24 16,0 t16,0 t16,0 t16,0 t16,0 t16,0"/>
+          </g>
+        </svg>
         <div>
+          <p class="script" id="duo">Pour les amoureux</p>
           <h1>Corde à Trois Fils</h1>
           <p class="muted">Des jeux pour vous deux, avec Elohîm au milieu. <span class="small">Ecclésiaste 4:12</span></p>
+          <p class="small" id="depuis" hidden></p>
         </div>
       </header>
 
@@ -157,6 +221,7 @@ nav.seg button{padding:9px 4px;white-space:nowrap}
           <label class="field"><span class="label">Prénom 1</span><input type="text" id="n1" maxlength="20" placeholder="Elle"></label>
           <label class="field"><span class="label">Prénom 2</span><input type="text" id="n2" maxlength="20" placeholder="Lui"></label>
         </div>
+        <label class="field" style="flex:none"><span class="label">Ensemble depuis le</span><input type="date" id="dj"></label>
         <div>
           <div class="label" style="margin-bottom:4px">Comment jouez-vous ?</div>
           <div class="seg" role="group" aria-label="Mode de jeu">
@@ -401,6 +466,22 @@ const store = {
   get(k,d){ try{ const v = localStorage.getItem("ctf-"+k); return v==null?d:v }catch(e){ return d } },
   set(k,v){ try{ localStorage.setItem("ctf-"+k,v) }catch(e){} }
 };
+/* Retour haptique : courte vibration sur les téléphones qui la proposent (Android). Sans effet ailleurs. */
+const tic = p => { try{ if(navigator.vibrate && !matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate(p) }catch(e){} };
+document.addEventListener("click", e => { if(e.target.closest && e.target.closest("button,a.btn")) tic(10) }, true);
+/* Pluie de cœurs : un petit bonheur partagé (bonne réponse, défi relevé, flamme, cœur reçu). */
+function coeurs(n){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const z=el("div",{class:"burst","aria-hidden":"true"});
+  for(let i=0;i<n;i++) z.append(el("i",{style:"left:"+(6+Math.random()*88)+"%;font-size:"+(16+Math.random()*22)+"px;animation-delay:"+(Math.random()*.45)+"s"},"♥"));
+  document.body.append(z); setTimeout(()=>z.remove(),2600);
+}
+/* Dos des cartes à retourner. */
+function dosCarte(){
+  const d=el("div",{class:"dos","aria-hidden":"true"});
+  d.innerHTML='<svg viewBox="0 0 100 100"><path d="M50,88 C20,66 6,48 6,30 C6,16 17,6 30,6 C39,6 46,11 50,19 C54,11 61,6 70,6 C83,6 94,16 94,30 C94,48 80,66 50,88 Z" fill="rgba(255,255,255,.07)" stroke="#E0BB62" stroke-width="3.5" stroke-linejoin="round"/></svg><span class="script">Pour vous deux</span><small>Touchez pour retourner</small>';
+  return d;
+}
 function hash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619) } return h>>>0 }
 function prng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296 } }
 function shuffle(arr, rnd){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
@@ -427,8 +508,19 @@ function syncMode(){
     : "Un seul appareil suffit : passez-le-vous à tour de rôle.";
 }
 $("n1").value=S.n1; $("n2").value=S.n2; $("code").value=S.code;
-$("n1").addEventListener("input",e=>{S.n1=e.target.value;store.set("n1",S.n1)});
-$("n2").addEventListener("input",e=>{S.n2=e.target.value;store.set("n2",S.n2)});
+/* Bandeau : les deux prénoms réunis par un cœur, et le nombre de jours passés ensemble. */
+function entete(){
+  const a=S.n1.trim(), b=S.n2.trim();
+  $("duo").textContent = a&&b ? a+" ♥ "+b : "Pour les amoureux";
+  const d=store.get("date",""), n=d?Math.floor((Date.now()-Date.parse(d+"T00:00:00"))/86400000):-1;
+  $("depuis").hidden = !(n>=0);
+  if(n>=0) $("depuis").textContent = n===0 ? "Votre histoire commence aujourd'hui" : "Ensemble depuis "+n.toLocaleString("fr-FR")+" jour"+(n>1?"s":"");
+}
+$("dj").value=store.get("date",""); $("dj").max=new Date().toISOString().slice(0,10);
+$("dj").addEventListener("input",e=>{store.set("date",e.target.value);entete()});
+$("n1").addEventListener("input",e=>{S.n1=e.target.value;store.set("n1",S.n1);entete()});
+$("n2").addEventListener("input",e=>{S.n2=e.target.value;store.set("n2",S.n2);entete()});
+entete();
 $("code").addEventListener("input",e=>{S.code=e.target.value;store.set("code",S.code)});
 $("m-e").addEventListener("click",()=>{S.mode="e";store.set("mode","e");syncMode()});
 $("m-d").addEventListener("click",()=>{S.mode="d";store.set("mode","d");syncMode()});
@@ -482,17 +574,18 @@ function runQuiz(st, bank, n, id){
     const opts=el("div",{class:"opts"});
     q.o.forEach(o=>opts.append(el("button",{type:"button",class:"opt",on:{click:ev=>{
       const ok=o===q.a; if(ok) score[turn]++;
+      tic(ok?[12,45,12]:80); if(ok) coeurs(5);
       [...opts.children].forEach(b=>{ b.disabled=true; if(b.textContent===q.a) b.classList.add("good") });
       if(!ok) ev.currentTarget.classList.add("bad");
       fb.textContent=(ok?"Bonne réponse. ":"La bonne réponse : "+q.a+". ")+(q.r?q.r:"");
       next.disabled=false; next.focus();
     }}},o)));
-    st.append(scores, el("div",{class:"card"},
+    st.append(scores, el("div",{class:"prog","aria-hidden":"true"}, el("i",{style:"width:"+(i/qs.length*100)+"%"})), el("div",{class:"card"},
       el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length),
       el("p",{class:"big"},q.q), opts, fb), el("div",{class:"actions"},next));
   };
   const end=()=>{
-    let msg, sub;
+    let msg, sub; coeurs(14); tic([20,60,20,60,40]);
     if (dist()){ msg=score[0]+" sur "+qs.length; sub="Annoncez vos scores l'un à l'autre. Celui qui perd choisit un verset à lire à voix haute." }
     else {
       const half=qs.length/2;
@@ -509,12 +602,25 @@ function runQuiz(st, bank, n, id){
 function deck(st, cards, label, hint){
   let i=0;
   const big=el("p",{class:"big"}), lab=el("span",{class:"label"}), h=el("p",{class:"small muted"},hint||"");
-  const next=el("button",{type:"button",class:"btn primary",on:{click:()=>{ i++; draw() }}},"Carte suivante");
-  const draw=()=>{
-    if(i>=cards.length){ big.textContent="Vous avez vu toutes les cartes de cette manche."; lab.textContent="Fin du paquet"; next.replaceWith(replayBtn("Rebattre les cartes")); return }
-    big.textContent=cards[i]; lab.textContent=label+" "+(i+1)+" sur "+cards.length;
+  const next=el("button",{type:"button",class:"btn primary",on:{click:()=>{ if(carte.classList.contains("cache")) return retourne(); i++; draw() }}},"Retourner la carte");
+  /* Chaque carte arrive face cachée : on la touche pour la retourner, on la glisse vers la gauche pour passer à la suivante. */
+  const carte=el("div",{class:"card flipcard",tabIndex:0,role:"button"},lab,big,h,dosCarte());
+  const retourne=()=>{
+    if(!carte.classList.contains("cache")) return;
+    carte.classList.remove("cache"); carte.classList.add("tourne"); carte.removeAttribute("aria-label"); next.textContent="Carte suivante"; tic(18);
+    setTimeout(()=>carte.classList.remove("tourne"),600);
   };
-  st.append(el("div",{class:"card"},lab,big,h), el("div",{class:"actions"},next));
+  carte.addEventListener("click",retourne);
+  carte.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); retourne() } });
+  let x0=null;
+  carte.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX },{passive:true});
+  carte.addEventListener("touchend",e=>{ if(x0!==null && x0-e.changedTouches[0].clientX>60 && !carte.classList.contains("cache") && i<cards.length){ i++; tic(10); draw() } x0=null });
+  const draw=()=>{
+    if(i>=cards.length){ carte.classList.remove("cache"); carte.removeAttribute("aria-label"); big.textContent="Vous avez vu toutes les cartes de cette manche."; lab.textContent="Fin du paquet"; next.replaceWith(replayBtn("Rebattre les cartes")); return }
+    big.textContent=cards[i]; lab.textContent=label+" "+(i+1)+" sur "+cards.length;
+    carte.classList.add("cache"); next.textContent="Retourner la carte"; carte.setAttribute("aria-label","Carte "+(i+1)+" sur "+cards.length+", face cachée. Appuyez pour la retourner.");
+  };
+  st.append(carte, el("div",{class:"actions"},next));
   draw();
 }
 
@@ -685,6 +791,9 @@ const Espace = (()=>{
       if(v.messages.length){ E.messages=(E.messages||[]).concat(v.messages).slice(-150); E.apres=E.messages[E.messages.length-1].id }
       const faits=new Set(v.releves); (E.messages||[]).forEach(m=>{ if(m.type==="defi") m.fait=faits.has(m.id) });
       E.fl=v.fl; E.defi={jour:v.jour,moi:v.defi.moi}; E.code=v.code; garde();
+      if(V && v.flamme>V.flamme){ tic([30,60,30,60,90]); coeurs(16) }
+      else if(V && recus){ tic([20,70,20]); if(v.messages.some(m=>m.de!==v.moi&&m.texte==="❤️")) coeurs(12) }
+      if(V && v.defi.autre && !V.defi.autre) coeurs(10);
       V=v;
       if(recus && (S.onglet!=="esp" || !$("play").hidden)) $("esp-dot").hidden=false;
       if(S.onglet==="esp"){ peint(); if(U&&U.msg&&U.msg.dataset.reseau){ dit(""); delete U.msg.dataset.reseau } }
@@ -718,6 +827,7 @@ const Espace = (()=>{
       el("div",{class:"panel"}, el("h2",null,"Notre discussion"), U.fil,
         el("div",{class:"send"}, champ, el("button",{type:"button",class:"btn primary",on:{click:part}},"Envoyer")),
         el("div",{class:"actions"},
+          el("button",{type:"button",class:"btn",on:{click:async()=>{ if(await envoie("/message",{type:"texte",texte:"❤️"})) coeurs(8) }}},"♥ Envoyer un cœur"),
           el("button",{type:"button",class:"btn",on:{click:()=>ouvreTiroir("jeu")}},"Inviter à un jeu"),
           el("button",{type:"button",class:"btn",on:{click:()=>ouvreTiroir("defi")}},"Lancer un défi")),
         U.tiroir, U.msg),
@@ -811,7 +921,7 @@ const Espace = (()=>{
       if(!ms.length) U.fil.append(el("p",{class:"small muted"},"Dites-vous bonjour. Ce qui s'écrit ici n'est visible que de vous deux."));
       ms.forEach(m=>{
         const mien=m.de===moi, qui=mien?"Vous":(autre||"Votre partenaire");
-        const b=el("div",{class:"msg"+(mien?" me":"")+(m.type!=="texte"?" special":"")});
+        const b=el("div",{class:"msg"+(mien?" me":"")+(m.type!=="texte"?" special":"")+(m.type==="texte"&&m.texte==="❤️"?" coeur":"")});
         if(m.type==="jeu"){
           const g=GAMES.find(x=>x.id===m.jeu);
           b.style.setProperty("--c","var("+(g?g.c:"--azur")+")");
@@ -822,7 +932,7 @@ const Espace = (()=>{
           b.append(el("span",{class:"label"},mien?"Votre défi":"Défi de "+qui), el("span",null,m.texte),
             m.fait?el("span",{class:"small",style:"color:var(--ok);font-weight:600"},"Défi relevé")
             : mien?el("span",{class:"small muted"},"En attente")
-            : el("button",{type:"button",class:"btn primary",on:{click:()=>envoie("/releve",{id:m.id})}},"Défi relevé"));
+            : el("button",{type:"button",class:"btn primary",on:{click:async()=>{ if(await envoie("/releve",{id:m.id})) coeurs(10) }}},"Défi relevé"));
         }else b.append(el("span",null,m.texte));
         b.append(el("span",{class:"when"},quand(m.t)));
         U.fil.append(b);
