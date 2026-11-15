@@ -1,29 +1,103 @@
-# question|bonne reponse|mauvaise|mauvaise|mauvaise
-Qui a travaillé quatorze ans pour épouser Rachel ?|Jacob|Ésaü|Isaac|Laban
-Qui est devenue l'épouse de Booz ?|Ruth|Naomi|Orpa|Esther
-Où Jésus a-t-il accompli son premier miracle ?|Aux noces de Cana|À Capernaüm|À Béthanie|À Jéricho
-Comment s'appelait l'épouse d'Abraham ?|Sara|Rebecca|Léa|Agar
-Qui était l'épouse d'Isaac ?|Rebecca|Rachel|Débora|Mical
-Quel couple a accueilli et enseigné Apollos ?|Aquilas et Priscille|Ananias et Saphira|Zacharie et Élisabeth|Joseph et Marie
-Combien de livres compte le Nouveau Testament ?|27|22|39|31
-Quel prophète a passé trois jours dans le ventre d'un grand poisson ?|Jonas|Élie|Amos|Daniel
-Qui étaient les parents de Jean-Baptiste ?|Zacharie et Élisabeth|Joseph et Marie|Elkana et Anne|Amram et Jokébed
-Qui était la mère du prophète Samuel ?|Anne|Peninna|Élisabeth|Ruth
-Quelle reine a risqué sa vie pour sauver son peuple ?|Esther|Vasthi|Jézabel|Bath-Schéba
-Pendant combien de jours la pluie est-elle tombée lors du déluge ?|40|7|12|150
-Quel est le premier fruit de l'Esprit cité dans Galates 5:22 ?|L'amour|La joie|La paix|La patience
-Quel disciple a renié Jésus trois fois ?|Pierre|Thomas|Judas|Jean
-Quel chapitre est souvent appelé « l'hymne à l'amour » ?|1 Corinthiens 13|Romains 8|Jean 3|Psaume 23
-Dans quelle ville Jésus est-il né ?|Bethléhem|Nazareth|Jérusalem|Cana
-Qui a interprété les songes de Pharaon ?|Joseph|Moïse|Daniel|Aaron
-Sur quelle montagne Moïse a-t-il reçu la loi ?|Le Sinaï|Le Carmel|Le mont des Oliviers|Le Nebo
-Quel prophète est monté au ciel dans un tourbillon ?|Élie|Élisée|Hénoc|Ésaïe
-Qui était la belle-mère de Ruth ?|Naomi|Anne|Sara|Débora
-Quel livre biblique célèbre l'amour entre l'époux et l'épouse ?|Le Cantique des cantiques|L'Ecclésiaste|Les Proverbes|Osée
-Qui a dit : « Où tu iras j'irai » ?|Ruth|Rebecca|Marie|Rachel
-Qui a vaincu Goliath ?|David|Saül|Jonathan|Samson
-Quel est le verset le plus court, « Jésus pleura » ?|Jean 11:35|Luc 19:41|Jean 3:16|Marc 1:1
-Qui Elohîm a-t-il demandé à Osée d'aimer malgré son infidélité ?|Gomer|Dalila|Thamar|Rahab
-Quel roi a demandé à Elohîm la sagesse plutôt que la richesse ?|Salomon|David|Ézéchias|Josias
-Qui a été jeté dans la fosse aux lions ?|Daniel|Jérémie|Joseph|Paul
-À qui Jésus ressuscité est-il apparu en premier ?|Marie de Magdala|Pierre|Thomas|Jean
+# question|bonne reponse|mauvaise|mauvaise|mauvaise|niveau (1 = facile, 2 = moyen, 3 = difficile)
+Qui a travaillé quatorze ans pour épouser Rachel ?|Jacob|Ésaü|Isaac|Laban|1
+Qui est devenue l'épouse de Booz ?|Ruth|Naomi|Orpa|Esther|1
+Où Jésus a-t-il accompli son premier miracle ?|Aux noces de Cana|À Capernaüm|À Béthanie|À Jéricho|1
+Comment s'appelait l'épouse d'Abraham ?|Sara|Rebecca|Léa|Agar|1
+Qui était l'épouse d'Isaac ?|Rebecca|Rachel|Débora|Mical|1
+Quel couple a accueilli et enseigné Apollos ?|Aquilas et Priscille|Ananias et Saphira|Zacharie et Élisabeth|Joseph et Marie|1
+Combien de livres compte le Nouveau Testament ?|27|22|39|31|1
+Quel prophète a passé trois jours dans le ventre d'un grand poisson ?|Jonas|Élie|Amos|Daniel|1
+Qui étaient les parents de Jean-Baptiste ?|Zacharie et Élisabeth|Joseph et Marie|Elkana et Anne|Amram et Jokébed|1
+Qui était la mère du prophète Samuel ?|Anne|Peninna|Élisabeth|Ruth|1
+Quelle reine a risqué sa vie pour sauver son peuple ?|Esther|Vasthi|Jézabel|Bath-Schéba|1
+Pendant combien de jours la pluie est-elle tombée lors du déluge ?|40|7|12|150|1
+Quel est le premier fruit de l'Esprit cité dans Galates 5:22 ?|L'amour|La joie|La paix|La patience|1
+Quel disciple a renié Jésus trois fois ?|Pierre|Thomas|Judas|Jean|1
+Quel chapitre est souvent appelé « l'hymne à l'amour » ?|1 Corinthiens 13|Romains 8|Jean 3|Psaume 23|1
+Dans quelle ville Jésus est-il né ?|Bethléhem|Nazareth|Jérusalem|Cana|1
+Qui a interprété les songes de Pharaon ?|Joseph|Moïse|Daniel|Aaron|1
+Sur quelle montagne Moïse a-t-il reçu la loi ?|Le Sinaï|Le Carmel|Le mont des Oliviers|Le Nebo|1
+Quel prophète est monté au ciel dans un tourbillon ?|Élie|Élisée|Hénoc|Ésaïe|1
+Qui était la belle-mère de Ruth ?|Naomi|Anne|Sara|Débora|1
+Quel livre biblique célèbre l'amour entre l'époux et l'épouse ?|Le Cantique des cantiques|L'Ecclésiaste|Les Proverbes|Osée|1
+Qui a dit : « Où tu iras j'irai » ?|Ruth|Rebecca|Marie|Rachel|1
+Qui a vaincu Goliath ?|David|Saül|Jonathan|Samson|1
+Quel est le verset le plus court, « Jésus pleura » ?|Jean 11:35|Luc 19:41|Jean 3:16|Marc 1:1|1
+Qui Elohîm a-t-il demandé à Osée d'aimer malgré son infidélité ?|Gomer|Dalila|Thamar|Rahab|1
+Quel roi a demandé à Elohîm la sagesse plutôt que la richesse ?|Salomon|David|Ézéchias|Josias|1
+Qui a été jeté dans la fosse aux lions ?|Daniel|Jérémie|Joseph|Paul|1
+À qui Jésus ressuscité est-il apparu en premier ?|Marie de Magdala|Pierre|Thomas|Jean|1
+Qui était le père de Jonathan, l'ami de David ?|Saül|Samuel|Isaï|Abner|2
+Combien de fils Jacob a-t-il eus ?|12|10|7|13|2
+Quel apôtre était collecteur d'impôts ?|Matthieu|Thomas|André|Philippe|2
+Dans quelle ville Paul et Silas ont-ils chanté en prison ?|Philippes|Éphèse|Corinthe|Thessalonique|2
+Qui a remplacé Judas parmi les douze ?|Matthias|Barnabas|Silas|Étienne|2
+Qui a vendu son droit d'aînesse pour un plat de lentilles ?|Ésaü|Jacob|Ruben|Ismaël|2
+Qui a été le premier roi d'Israël ?|Saül|David|Salomon|Samuel|2
+Quelle femme juge a conduit Israël au combat avec Barak ?|Débora|Jaël|Myriam|Hulda|2
+Combien de pierres David a-t-il ramassées avant d'affronter Goliath ?|5|1|3|7|2
+Sur quelle île Jean a-t-il reçu l'Apocalypse ?|Patmos|Chypre|Malte|Crète|2
+Qui a succédé à Moïse à la tête d'Israël ?|Josué|Caleb|Aaron|Éléazar|2
+Quel était le métier de Luc ?|Médecin|Pêcheur|Scribe|Faiseur de tentes|2
+Qui a caché les espions d'Israël à Jéricho ?|Rahab|Ruth|Débora|Abigaïl|2
+Qui était le frère de Marthe et de Marie ?|Lazare|Simon|Nicodème|Zachée|2
+Combien de jours Jésus a-t-il jeûné dans le désert ?|40|7|21|30|2
+Quel est le dernier livre de l'Ancien Testament ?|Malachie|Zacharie|Daniel|Aggée|2
+Qui a demandé à Pilate le corps de Jésus ?|Joseph d'Arimathée|Nicodème|Simon de Cyrène|Jean|2
+Quel couple a menti aux apôtres sur le prix d'un champ ?|Ananias et Saphira|Aquilas et Priscille|Philémon et Apphia|Andronicus et Junias|2
+Quelle veuve de Nabal est devenue l'épouse de David ?|Abigaïl|Mical|Bath-Schéba|Achinoam|2
+Qui était la sœur de Moïse et d'Aaron ?|Myriam|Séphora|Jokébed|Débora|2
+Qui est monté sur un sycomore pour voir passer Jésus ?|Zachée|Bartimée|Nicodème|Matthieu|2
+Qui était l'épouse de Moïse ?|Séphora|Myriam|Kétura|Asnath|2
+Qui a été le premier martyr de l'Église ?|Étienne|Jacques|Philippe|Barnabas|2
+Sur le chemin de quelle ville Saul a-t-il rencontré Jésus ?|Damas|Antioche|Tarse|Césarée|2
+Quel livre vient juste après les quatre Évangiles ?|Les Actes des apôtres|Romains|Hébreux|Jacques|2
+Combien d'années Jacob a-t-il servi Laban avant de recevoir Léa ?|Sept ans|Trois ans|Dix ans|Quatorze ans|2
+Quel juge tirait sa force de ses cheveux ?|Samson|Gédéon|Jephthé|Éhud|2
+De quelle ville Paul était-il originaire ?|Tarse|Damas|Antioche|Jérusalem|2
+Quel fils de David a pris les armes contre son père ?|Absalom|Amnon|Salomon|Nathan|2
+Combien de personnes sont entrées dans l'arche de Noé ?|8|2|4|12|2
+Quel prophète a défié les prophètes de Baal sur le mont Carmel ?|Élie|Élisée|Ésaïe|Samuel|2
+Qui était le père des apôtres Jacques et Jean ?|Zébédée|Alphée|Jonas|Zacharie|2
+À quel âge Jésus a-t-il été retrouvé au temple parmi les docteurs ?|12 ans|7 ans|10 ans|30 ans|2
+Qui a été contraint de porter la croix de Jésus ?|Simon de Cyrène|Joseph d'Arimathée|Nicodème|Barabbas|2
+Qui était le père de David ?|Isaï|Obed|Booz|Saül|2
+Quel prêtre a élevé le jeune Samuel ?|Éli|Abiathar|Tsadok|Aaron|2
+Quelle reine est venue éprouver Salomon par des énigmes ?|La reine de Séba|La reine Vasthi|La reine Candace|La reine Athalie|2
+Quelle servante de Sara a donné naissance à Ismaël ?|Agar|Kétura|Bilha|Zilpa|2
+Dans quel livre lit-on « Il y a un temps pour tout » ?|L'Ecclésiaste|Les Proverbes|Job|Les Psaumes|2
+Qui était le père de Mathusalem ?|Hénoc|Lémec|Noé|Jéred|3
+Quel roi a vu une main écrire sur le mur de son palais ?|Belschatsar|Nebucadnetsar|Darius|Cyrus|3
+Quelle femme a tué Sisera avec un pieu de tente ?|Jaël|Débora|Rahab|Abigaïl|3
+Qui était l'échanson du roi Artaxerxès ?|Néhémie|Esdras|Mardochée|Daniel|3
+Quel serviteur d'Élisée a été frappé de lèpre ?|Guéhazi|Naaman|Baruc|Abdias|3
+Combien d'hommes Gédéon a-t-il gardés pour combattre Madian ?|300|1 000|3 000|10 000|3
+Qui était la mère de Timothée ?|Eunice|Loïs|Lydie|Phœbé|3
+Quel esclave fugitif Paul renvoie-t-il à Philémon ?|Onésime|Épaphras|Tychique|Archippe|3
+Dans quelle ville les disciples ont-ils été appelés chrétiens pour la première fois ?|Antioche|Jérusalem|Éphèse|Rome|3
+Qui était le mari de Bath-Schéba avant David ?|Urie|Nabal|Abner|Joab|3
+Quel prophète a vu une vallée d'ossements desséchés reprendre vie ?|Ézéchiel|Jérémie|Ésaïe|Daniel|3
+Quel roi de Juda a vu sa vie prolongée de quinze ans ?|Ézéchias|Josias|Asa|Josaphat|3
+Qui est tombé d'une fenêtre pendant un long discours de Paul ?|Eutychus|Tychique|Trophime|Épaphrodite|3
+Quel fils de Jonathan, boiteux, David a-t-il accueilli à sa table ?|Mephiboscheth|Isch-Boscheth|Tsiba|Abiathar|3
+Quelle marchande de pourpre a ouvert sa maison à Paul à Philippes ?|Lydie|Dorcas|Phœbé|Chloé|3
+Quel est le livre le plus court de l'Ancien Testament ?|Abdias|Aggée|Nahum|Jonas|3
+Combien de psaumes compte le livre des Psaumes ?|150|100|119|176|3
+Comment s'appelait le fils de Ruth et de Booz ?|Obed|Isaï|Élimélec|Machlon|3
+Quel magicien a voulu acheter le don de l'Esprit ?|Simon|Élymas|Scéva|Démétrius|3
+Sur quelle île Paul a-t-il fait naufrage ?|Malte|Crète|Chypre|Patmos|3
+Qui est devenu roi de Juda à huit ans ?|Josias|Joas|Manassé|Ézéchias|3
+Quel était le métier d'Amos avant d'être prophète ?|Berger|Pêcheur|Scribe|Potier|3
+Quel proconsul de Chypre a cru en écoutant Paul ?|Sergius Paulus|Gallion|Félix|Festus|3
+Combien d'années devait durer l'exil à Babylone annoncé par Jérémie ?|70 ans|40 ans|50 ans|400 ans|3
+Comment s'appelait le beau-père de Moïse, prêtre de Madian ?|Jéthro|Laban|Caleb|Amram|3
+Quel apôtre était surnommé Didyme ?|Thomas|Barthélemy|Thaddée|Philippe|3
+Laquelle des femmes de Jacob était la mère de Juda ?|Léa|Rachel|Bilha|Zilpa|3
+Qui a été le dernier juge d'Israël avant la royauté ?|Samuel|Samson|Éli|Gédéon|3
+Qui a écrit « la foi sans les œuvres est morte » ?|Jacques|Paul|Pierre|Jean|3
+Combien de fois Naaman s'est-il plongé dans le Jourdain ?|7|3|12|40|3
+Quel nom babylonien Daniel a-t-il reçu ?|Beltschatsar|Schadrac|Méschac|Abed-Nego|3
+Quel roi a signé le décret qui a conduit Daniel dans la fosse aux lions ?|Darius|Nebucadnetsar|Cyrus|Assuérus|3
+Quelle prophétesse âgée a reconnu l'enfant Jésus au temple ?|Anne|Élisabeth|Hulda|Débora|3
+Quel frère a proposé de vendre Joseph plutôt que de le tuer ?|Juda|Ruben|Siméon|Lévi|3
+Qui Paul a-t-il laissé en Crète pour y établir des anciens ?|Tite|Timothée|Silas|Apollos|3
