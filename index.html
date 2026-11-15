@@ -263,6 +263,7 @@ input[type=date]{width:100%;padding:10px 12px;border:1px solid var(--line);borde
 
 <script>
 /* ---------- Contenu ---------- */
+/* Troisième valeur : niveau de la question (1 facile par défaut, 2 moyen, 3 difficile). */
 const QUIZ = [
  ["Qui a travaillé quatorze ans pour épouser Rachel ?",["Jacob","Ésaü","Isaac","Laban"]],
  ["Qui est devenue l'épouse de Booz ?",["Ruth","Naomi","Orpa","Esther"]],
@@ -291,8 +292,82 @@ const QUIZ = [
  ["Qui Elohîm a-t-il demandé à Osée d'aimer malgré son infidélité ?",["Gomer","Dalila","Thamar","Rahab"]],
  ["Quel roi a demandé à Elohîm la sagesse plutôt que la richesse ?",["Salomon","David","Ézéchias","Josias"]],
  ["Qui a été jeté dans la fosse aux lions ?",["Daniel","Jérémie","Joseph","Paul"]],
- ["À qui Jésus ressuscité est-il apparu en premier ?",["Marie de Magdala","Pierre","Thomas","Jean"]]
-].map(([q,o])=>({q,o,a:o[0]}));
+ ["À qui Jésus ressuscité est-il apparu en premier ?",["Marie de Magdala","Pierre","Thomas","Jean"]],
+ ["Qui était le père de Jonathan, l'ami de David ?",["Saül","Samuel","Isaï","Abner"],2],
+ ["Combien de fils Jacob a-t-il eus ?",["12","10","7","13"],2],
+ ["Quel apôtre était collecteur d'impôts ?",["Matthieu","Thomas","André","Philippe"],2],
+ ["Dans quelle ville Paul et Silas ont-ils chanté en prison ?",["Philippes","Éphèse","Corinthe","Thessalonique"],2],
+ ["Qui a remplacé Judas parmi les douze ?",["Matthias","Barnabas","Silas","Étienne"],2],
+ ["Qui a vendu son droit d'aînesse pour un plat de lentilles ?",["Ésaü","Jacob","Ruben","Ismaël"],2],
+ ["Qui a été le premier roi d'Israël ?",["Saül","David","Salomon","Samuel"],2],
+ ["Quelle femme juge a conduit Israël au combat avec Barak ?",["Débora","Jaël","Myriam","Hulda"],2],
+ ["Combien de pierres David a-t-il ramassées avant d'affronter Goliath ?",["5","1","3","7"],2],
+ ["Sur quelle île Jean a-t-il reçu l'Apocalypse ?",["Patmos","Chypre","Malte","Crète"],2],
+ ["Qui a succédé à Moïse à la tête d'Israël ?",["Josué","Caleb","Aaron","Éléazar"],2],
+ ["Quel était le métier de Luc ?",["Médecin","Pêcheur","Scribe","Faiseur de tentes"],2],
+ ["Qui a caché les espions d'Israël à Jéricho ?",["Rahab","Ruth","Débora","Abigaïl"],2],
+ ["Qui était le frère de Marthe et de Marie ?",["Lazare","Simon","Nicodème","Zachée"],2],
+ ["Combien de jours Jésus a-t-il jeûné dans le désert ?",["40","7","21","30"],2],
+ ["Quel est le dernier livre de l'Ancien Testament ?",["Malachie","Zacharie","Daniel","Aggée"],2],
+ ["Qui a demandé à Pilate le corps de Jésus ?",["Joseph d'Arimathée","Nicodème","Simon de Cyrène","Jean"],2],
+ ["Quel couple a menti aux apôtres sur le prix d'un champ ?",["Ananias et Saphira","Aquilas et Priscille","Philémon et Apphia","Andronicus et Junias"],2],
+ ["Quelle veuve de Nabal est devenue l'épouse de David ?",["Abigaïl","Mical","Bath-Schéba","Achinoam"],2],
+ ["Qui était la sœur de Moïse et d'Aaron ?",["Myriam","Séphora","Jokébed","Débora"],2],
+ ["Qui est monté sur un sycomore pour voir passer Jésus ?",["Zachée","Bartimée","Nicodème","Matthieu"],2],
+ ["Qui était l'épouse de Moïse ?",["Séphora","Myriam","Kétura","Asnath"],2],
+ ["Qui a été le premier martyr de l'Église ?",["Étienne","Jacques","Philippe","Barnabas"],2],
+ ["Sur le chemin de quelle ville Saul a-t-il rencontré Jésus ?",["Damas","Antioche","Tarse","Césarée"],2],
+ ["Quel livre vient juste après les quatre Évangiles ?",["Les Actes des apôtres","Romains","Hébreux","Jacques"],2],
+ ["Combien d'années Jacob a-t-il servi Laban avant de recevoir Léa ?",["Sept ans","Trois ans","Dix ans","Quatorze ans"],2],
+ ["Quel juge tirait sa force de ses cheveux ?",["Samson","Gédéon","Jephthé","Éhud"],2],
+ ["De quelle ville Paul était-il originaire ?",["Tarse","Damas","Antioche","Jérusalem"],2],
+ ["Quel fils de David a pris les armes contre son père ?",["Absalom","Amnon","Salomon","Nathan"],2],
+ ["Combien de personnes sont entrées dans l'arche de Noé ?",["8","2","4","12"],2],
+ ["Quel prophète a défié les prophètes de Baal sur le mont Carmel ?",["Élie","Élisée","Ésaïe","Samuel"],2],
+ ["Qui était le père des apôtres Jacques et Jean ?",["Zébédée","Alphée","Jonas","Zacharie"],2],
+ ["À quel âge Jésus a-t-il été retrouvé au temple parmi les docteurs ?",["12 ans","7 ans","10 ans","30 ans"],2],
+ ["Qui a été contraint de porter la croix de Jésus ?",["Simon de Cyrène","Joseph d'Arimathée","Nicodème","Barabbas"],2],
+ ["Qui était le père de David ?",["Isaï","Obed","Booz","Saül"],2],
+ ["Quel prêtre a élevé le jeune Samuel ?",["Éli","Abiathar","Tsadok","Aaron"],2],
+ ["Quelle reine est venue éprouver Salomon par des énigmes ?",["La reine de Séba","La reine Vasthi","La reine Candace","La reine Athalie"],2],
+ ["Quelle servante de Sara a donné naissance à Ismaël ?",["Agar","Kétura","Bilha","Zilpa"],2],
+ ["Dans quel livre lit-on « Il y a un temps pour tout » ?",["L'Ecclésiaste","Les Proverbes","Job","Les Psaumes"],2],
+ ["Qui était le père de Mathusalem ?",["Hénoc","Lémec","Noé","Jéred"],3],
+ ["Quel roi a vu une main écrire sur le mur de son palais ?",["Belschatsar","Nebucadnetsar","Darius","Cyrus"],3],
+ ["Quelle femme a tué Sisera avec un pieu de tente ?",["Jaël","Débora","Rahab","Abigaïl"],3],
+ ["Qui était l'échanson du roi Artaxerxès ?",["Néhémie","Esdras","Mardochée","Daniel"],3],
+ ["Quel serviteur d'Élisée a été frappé de lèpre ?",["Guéhazi","Naaman","Baruc","Abdias"],3],
+ ["Combien d'hommes Gédéon a-t-il gardés pour combattre Madian ?",["300","1 000","3 000","10 000"],3],
+ ["Qui était la mère de Timothée ?",["Eunice","Loïs","Lydie","Phœbé"],3],
+ ["Quel esclave fugitif Paul renvoie-t-il à Philémon ?",["Onésime","Épaphras","Tychique","Archippe"],3],
+ ["Dans quelle ville les disciples ont-ils été appelés chrétiens pour la première fois ?",["Antioche","Jérusalem","Éphèse","Rome"],3],
+ ["Qui était le mari de Bath-Schéba avant David ?",["Urie","Nabal","Abner","Joab"],3],
+ ["Quel prophète a vu une vallée d'ossements desséchés reprendre vie ?",["Ézéchiel","Jérémie","Ésaïe","Daniel"],3],
+ ["Quel roi de Juda a vu sa vie prolongée de quinze ans ?",["Ézéchias","Josias","Asa","Josaphat"],3],
+ ["Qui est tombé d'une fenêtre pendant un long discours de Paul ?",["Eutychus","Tychique","Trophime","Épaphrodite"],3],
+ ["Quel fils de Jonathan, boiteux, David a-t-il accueilli à sa table ?",["Mephiboscheth","Isch-Boscheth","Tsiba","Abiathar"],3],
+ ["Quelle marchande de pourpre a ouvert sa maison à Paul à Philippes ?",["Lydie","Dorcas","Phœbé","Chloé"],3],
+ ["Quel est le livre le plus court de l'Ancien Testament ?",["Abdias","Aggée","Nahum","Jonas"],3],
+ ["Combien de psaumes compte le livre des Psaumes ?",["150","100","119","176"],3],
+ ["Comment s'appelait le fils de Ruth et de Booz ?",["Obed","Isaï","Élimélec","Machlon"],3],
+ ["Quel magicien a voulu acheter le don de l'Esprit ?",["Simon","Élymas","Scéva","Démétrius"],3],
+ ["Sur quelle île Paul a-t-il fait naufrage ?",["Malte","Crète","Chypre","Patmos"],3],
+ ["Qui est devenu roi de Juda à huit ans ?",["Josias","Joas","Manassé","Ézéchias"],3],
+ ["Quel était le métier d'Amos avant d'être prophète ?",["Berger","Pêcheur","Scribe","Potier"],3],
+ ["Quel proconsul de Chypre a cru en écoutant Paul ?",["Sergius Paulus","Gallion","Félix","Festus"],3],
+ ["Combien d'années devait durer l'exil à Babylone annoncé par Jérémie ?",["70 ans","40 ans","50 ans","400 ans"],3],
+ ["Comment s'appelait le beau-père de Moïse, prêtre de Madian ?",["Jéthro","Laban","Caleb","Amram"],3],
+ ["Quel apôtre était surnommé Didyme ?",["Thomas","Barthélemy","Thaddée","Philippe"],3],
+ ["Laquelle des femmes de Jacob était la mère de Juda ?",["Léa","Rachel","Bilha","Zilpa"],3],
+ ["Qui a été le dernier juge d'Israël avant la royauté ?",["Samuel","Samson","Éli","Gédéon"],3],
+ ["Qui a écrit « la foi sans les œuvres est morte » ?",["Jacques","Paul","Pierre","Jean"],3],
+ ["Combien de fois Naaman s'est-il plongé dans le Jourdain ?",["7","3","12","40"],3],
+ ["Quel nom babylonien Daniel a-t-il reçu ?",["Beltschatsar","Schadrac","Méschac","Abed-Nego"],3],
+ ["Quel roi a signé le décret qui a conduit Daniel dans la fosse aux lions ?",["Darius","Nebucadnetsar","Cyrus","Assuérus"],3],
+ ["Quelle prophétesse âgée a reconnu l'enfant Jésus au temple ?",["Anne","Élisabeth","Hulda","Débora"],3],
+ ["Quel frère a proposé de vendre Joseph plutôt que de le tuer ?",["Juda","Ruben","Siméon","Lévi"],3],
+ ["Qui Paul a-t-il laissé en Crète pour y établir des anciens ?",["Tite","Timothée","Silas","Apollos"],3]
+].map(([q,o,n])=>({q,o,a:o[0],n:n||1}));
 
 /* Versets : Bible de Yéhoshoua ha Mashiah (BYM) */
 const PAROLES = [
@@ -492,10 +567,12 @@ const rounds = {};
 const names = () => [S.n1.trim()||"Joueur 1", S.n2.trim()||"Joueur 2"];
 let invite = null; /* partie lancée depuis une invitation de l'espace à deux : même tirage sur les deux appareils */
 const dist = () => S.mode==="d" || !!invite;
-function rndFor(id, extra){
+/* fixe : le même tirage pour toutes les manches d'une partie, pour avancer dans la banque sans redite. */
+const SESSION = (Math.random()*4294967296)>>>0;
+function rndFor(id, extra, fixe){
   const code = invite || S.code.trim().toLowerCase();
-  if (dist() && code) return prng(hash(code+"|"+id+"|"+(rounds[id]||1)+"|"+(extra||"")));
-  return prng((Math.random()*4294967296)>>>0);
+  if (dist() && code) return prng(hash(code+"|"+id+"|"+(fixe?"*":(rounds[id]||1))+"|"+(extra||"")));
+  return prng(fixe ? hash(SESSION+"|"+id+"|"+(extra||"")) : (Math.random()*4294967296)>>>0);
 }
 
 /* ---------- Accueil ---------- */
@@ -550,17 +627,57 @@ function open(g){
 }
 function replay(){ rounds[current.id]++; start() }
 function start(){
-  $("round").textContent = "Manche "+rounds[current.id]+(invite?" · partie à deux":dist()&&S.code.trim()?" · code "+S.code.trim():"");
+  const niv = current.id==="quiz"||current.id==="vers" ? " · "+NIVEAUX[palier(current.id)-1] : "";
+  $("round").textContent = "Manche "+rounds[current.id]+niv+(invite?" · partie à deux":dist()&&S.code.trim()?" · code "+S.code.trim():"");
   const st=$("stage"); st.textContent="";
   ({mariage:()=>deck(st, shuffle(MARIAGE, rndFor("mariage")), "Question", "Prenez votre temps. Une seule question bien discutée vaut mieux que dix survolées."),
-    quiz:()=>runQuiz(st,QUIZ,10,"quiz"), vers:()=>runQuiz(st,VERSETS,8,"vers"),
+    quiz:()=>runQuiz(st,tirageQuiz(),"quiz"), vers:()=>runQuiz(st,tirageVersets(),"vers"),
     coeur:()=>runCoeur(st), qui:()=>runQui(st), defi:()=>runDefi(st), prier:()=>runPrier(st)})[current.id]();
 }
 const replayBtn = label => el("button",{type:"button",class:"btn primary",on:{click:replay}},label||"Nouvelle manche");
 
 /* ---------- Quiz et versets ---------- */
-function runQuiz(st, bank, n, id){
-  const rnd=rndFor(id), qs=shuffle(bank,rnd).slice(0,n).map(q=>({...q,o:shuffle(q.o,rnd)}));
+/* La difficulté monte avec les manches : facile, moyen, difficile, puis expert à partir de la quatrième. */
+const NIVEAUX = ["Facile","Moyen","Difficile","Expert"];
+const palier = id => Math.min(rounds[id]||1, 4);
+/* Compare deux mots sans tenir compte des majuscules, des accents ni de la ponctuation. */
+const cle = s => String(s).toLowerCase().replace(/œ/g,"oe").replace(/æ/g,"ae").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g," ").trim();
+
+/* Duel biblique : nombre de questions faciles, moyennes et difficiles à chaque palier. */
+const DOSES = [[7,3,0],[3,5,2],[0,5,5],[0,2,8]];
+function tirageQuiz(){
+  const r=rounds.quiz||1, rnd=rndFor("quiz"), out=[];
+  const lots=[1,2,3].map(n=>shuffle(QUIZ.filter(q=>(q.n||1)===n), rndFor("quiz","n"+n,true)));
+  const pris=[0,0,0];
+  for(let k=1;k<r;k++) DOSES[Math.min(k,4)-1].forEach((x,j)=>pris[j]+=x);
+  DOSES[Math.min(r,4)-1].forEach((x,j)=>{
+    const lot=lots[j];
+    for(let k=0;k<x&&k<lot.length;k++) out.push(lot[(pris[j]+k)%lot.length]);
+  });
+  if(out.length<10) out.push(...shuffle(QUIZ.filter(q=>!out.includes(q)), rndFor("quiz","reste")).slice(0,10-out.length));
+  return out.sort((a,b)=>(a.n||1)-(b.n||1)).map(q=>({...q,o:shuffle(q.o,rnd),niv:NIVEAUX[(q.n||1)-1]}));
+}
+
+/* Le mot manquant : quatre choix, puis des choix qui se ressemblent, puis le mot à écrire soi-même. */
+function proches(a, rnd){
+  const A=cle(a), maj=c=>c!==c.toLowerCase(), vus=new Set([A]), mots=[];
+  VERSETS.forEach(v=>v.o.forEach(m=>{ const k=cle(m); if(!vus.has(k)){ vus.add(k); mots.push(m) } }));
+  const fin=(x,y)=>{ let n=0; while(n<x.length&&n<y.length&&x[x.length-1-n]===y[y.length-1-n]) n++; return n };
+  return shuffle(mots,rnd).map(m=>{ const M=cle(m); return [m, Math.min(fin(A,M),4)*3-Math.abs(A.length-M.length)+(maj(m[0])===maj(a[0])?2:0)] })
+    .sort((x,y)=>y[1]-x[1]).slice(0,3).map(x=>x[0]);
+}
+function tirageVersets(){
+  const r=rounds.vers||1, p=palier("vers"), rnd=rndFor("vers"), lot=shuffle(VERSETS, rndFor("vers","lot",true)), out=[];
+  for(let k=0;k<8&&k<lot.length;k++) out.push(lot[((r-1)*8+k)%lot.length]);
+  return out.map(q=>{
+    if(p===1) return {...q,o:shuffle(q.o,rnd)};
+    if(p===2){ const w=proches(q.a,rnd); return {...q,o:shuffle(w.length===3?[q.a,...w]:q.o,rnd)} }
+    const n=[...q.a].length;
+    return {...q,saisie:true,indice:"Indice : "+n+" lettre"+(n>1?"s":"")+(p===3?", commence par « "+[...q.a][0]+" ».":".")};
+  });
+}
+
+function runQuiz(st, qs, id){
   const nm=names(), score=[0,0]; let i=0;
   const show=()=>{
     st.textContent="";
@@ -570,19 +687,37 @@ function runQuiz(st, bank, n, id){
       ? el("div",{class:"scores"}, el("div",{class:"score turn"}, el("b",null,String(score[0])), el("span",{class:"small muted"},"Ton score")))
       : el("div",{class:"scores"}, ...[0,1].map(p=>el("div",{class:"score"+(p===turn?" turn":"")}, el("b",null,String(score[p])), el("span",{class:"small muted"},nm[p]+(p===turn?" · à toi":"")))));
     const next=el("button",{type:"button",class:"btn primary",disabled:true,on:{click:()=>{i++;show()}}}, i===qs.length-1?"Voir le résultat":"Question suivante");
-    const fb=el("p",{class:"small muted"});
-    const opts=el("div",{class:"opts"});
-    q.o.forEach(o=>opts.append(el("button",{type:"button",class:"opt",on:{click:ev=>{
-      const ok=o===q.a; if(ok) score[turn]++;
+    const fb=el("p",{class:"small muted",role:"status"});
+    const juge=ok=>{
+      if(ok) score[turn]++;
       tic(ok?[12,45,12]:80); if(ok) coeurs(5);
-      [...opts.children].forEach(b=>{ b.disabled=true; if(b.textContent===q.a) b.classList.add("good") });
-      if(!ok) ev.currentTarget.classList.add("bad");
       fb.textContent=(ok?"Bonne réponse. ":"La bonne réponse : "+q.a+". ")+(q.r?q.r:"");
       next.disabled=false; next.focus();
-    }}},o)));
+    };
+    let zone;
+    if(q.saisie){
+      const champ=el("input",{type:"text",maxLength:40,autocomplete:"off",autocapitalize:"off",spellcheck:false,placeholder:"Écrivez le mot","aria-label":"Le mot manquant"});
+      const ok=el("button",{type:"button",class:"btn primary"},"Valider");
+      const valide=()=>{
+        if(champ.disabled||!champ.value.trim()) return;
+        const bon=cle(champ.value)===cle(q.a);
+        champ.disabled=ok.disabled=true; champ.style.borderColor=bon?"var(--ok)":"var(--ko)"; juge(bon);
+      };
+      ok.addEventListener("click",valide);
+      champ.addEventListener("keydown",e=>{ if(e.key==="Enter") valide() });
+      zone=el("div",{class:"app",style:"gap:8px"}, el("p",{class:"small muted"},q.indice), el("div",{class:"send"},champ,ok));
+    }else{
+      zone=el("div",{class:"opts"});
+      q.o.forEach(o=>zone.append(el("button",{type:"button",class:"opt",on:{click:ev=>{
+        const ok=o===q.a;
+        [...zone.children].forEach(b=>{ b.disabled=true; if(b.textContent===q.a) b.classList.add("good") });
+        if(!ok) ev.currentTarget.classList.add("bad");
+        juge(ok);
+      }}},o)));
+    }
     st.append(scores, el("div",{class:"prog","aria-hidden":"true"}, el("i",{style:"width:"+(i/qs.length*100)+"%"})), el("div",{class:"card"},
-      el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length),
-      el("p",{class:"big"},q.q), opts, fb), el("div",{class:"actions"},next));
+      el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length+(q.niv?" · "+q.niv:"")),
+      el("p",{class:"big"},q.q), zone, fb), el("div",{class:"actions"},next));
   };
   const end=()=>{
     let msg, sub; coeurs(14); tic([20,60,20,60,40]);
@@ -592,8 +727,9 @@ function runQuiz(st, bank, n, id){
       msg = score[0]===score[1] ? "Égalité, "+score[0]+" partout" : (score[0]>score[1]?nm[0]:nm[1])+" l'emporte";
       sub = nm[0]+" : "+score[0]+" sur "+half+" · "+nm[1]+" : "+score[1]+" sur "+half+". Le perdant offre une prière au gagnant.";
     }
-    st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},msg), el("p",{class:"muted"},sub)),
-      el("div",{class:"actions"},replayBtn()));
+    const suite = palier(id)<4 ? "La prochaine manche sera plus difficile." : "Vous jouez au niveau le plus élevé.";
+    st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat · niveau "+NIVEAUX[palier(id)-1].toLowerCase()), el("p",{class:"big"},msg), el("p",{class:"muted"},sub), el("p",{class:"small muted"},suite)),
+      el("div",{class:"actions"},replayBtn(palier(id)<4?"Manche suivante, plus difficile":"Nouvelle manche")));
   };
   show();
 }
@@ -645,6 +781,8 @@ function runDefi(st){
 
 /* ---------- Qui de nous deux ---------- */
 function runQui(st){
+  const duo = invite ? Espace.duo() : null;
+  if(duo) return quiDuo(st, duo);
   const qs=shuffle(QUI, rndFor("qui")).slice(0,10), nm=names(), tally=[0,0]; let i=0;
   const show=()=>{
     st.textContent="";
@@ -662,6 +800,83 @@ function runQui(st){
       el("div",{class:"opts"}, ...[0,1].map(p=>el("button",{type:"button",class:"opt",on:{click:()=>{tally[p]++;i++;show()}}},nm[p])))));
   };
   show();
+}
+
+/* Partie lancée depuis « Notre espace » : chacun choisit sur son appareil, et les deux choix
+   se dévoilent quand les deux ont répondu. Le serveur garde les choix : on peut quitter et revenir. */
+function quiDuo(st, duo){
+  const qs=shuffle(QUI, rndFor("qui")).slice(0,10), moi=duo.moi, graine=invite, manche=rounds.qui;
+  const nm=p=>duo.noms[p]||(p===moi?"Moi":"Votre partenaire"), lui=nm(1-moi);
+  const deLui=(/^[aeiouyhàâéèêëîïôöûü]/i.test(lui)?"d'":"de ")+lui;
+  const zone=el("div",{class:"app",style:"gap:14px"}), err=el("p",{class:"small",role:"status",style:"color:var(--ko)"});
+  st.append(zone, err);
+  let etat=null, i=0, sig="", occupe=false, minut=null; const fetes=new Set();
+  const actif=()=>zone.isConnected && !$("play").hidden;
+  async function charge(corps){
+    while(occupe && corps) await new Promise(r=>setTimeout(r,80));
+    if(occupe) return false;
+    occupe=true;
+    try{
+      const r=await Espace.partie(Object.assign({graine,manche},corps||{}));
+      if(!actif()) return false;
+      if(!etat){ i=r.moi.slice(0,qs.length).findIndex(x=>x==null); if(i<0) i=qs.length }
+      etat=r; err.textContent=""; return true;
+    }catch(e){ if(actif()) err.textContent=e.message; return false }
+    finally{ occupe=false }
+  }
+  const rang=(p,quoi)=>el("div",{class:"answer"}, el("span",{class:"label"},p===moi?"Vous":nm(p)), el("p",null,quoi));
+  const connu=a=>a===0||a===1;
+  function peint(){
+    const s=i+"|"+JSON.stringify(etat); if(s===sig) return; sig=s;
+    zone.textContent="";
+    if(!etat) return void zone.append(el("div",{class:"card"}, el("p",{class:"muted"},"Connexion à votre partie…")));
+    if(i>=qs.length) return bilan();
+    const m=etat.moi[i], a=etat.autre[i];
+    const carte=el("div",{class:"card"}, el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length), el("p",{class:"big"},qs[i]));
+    if(m==null){
+      const opts=el("div",{class:"opts"}), fige=v=>[...opts.children].forEach(b=>b.disabled=v);
+      [0,1].forEach(p=>opts.append(el("button",{type:"button",class:"opt",on:{click:async()=>{
+        fige(true);
+        if(await charge({q:i,c:p})) peint(); else fige(false);
+      }}}, nm(p)+(p===moi?" (moi)":""))));
+      carte.append(el("p",{class:"small muted"}, a!=null ? lui+" a déjà répondu. Son choix s'affichera après le vôtre."
+        : "Chacun choisit de son côté. Vos deux choix se dévoilent quand vous avez répondu tous les deux."), opts);
+      zone.append(carte);
+    }else{
+      carte.append(rang(moi, nm(m)));
+      if(connu(a)){
+        carte.append(rang(1-moi, nm(a)), el("p",{style:"font-weight:600;color:var("+(a===m?"--ok":"--ko")+")"}, a===m?"Même réponse !":"Pas d'accord : expliquez-vous."));
+        if(a===m && !fetes.has(i)){ coeurs(6); tic([12,45,12]) }
+        fetes.add(i);
+      }else carte.append(el("p",{class:"small muted"},"En attente du choix "+deLui+"…"));
+      zone.append(carte, el("div",{class:"actions"}, el("button",{type:"button",class:"btn primary",on:{click:()=>{ i++; peint() }}}, i===qs.length-1?"Voir le résultat":"Question suivante")));
+    }
+  }
+  function bilan(){
+    let accord=0, vus=0; const des=[0,0], liste=el("div",{class:"app",style:"gap:10px"});
+    qs.forEach((q,k)=>{
+      const m=etat.moi[k], a=etat.autre[k], ok=connu(a);
+      if(connu(m)) des[m]++;
+      if(ok){ des[a]++; vus++; if(a===m) accord++ }
+      liste.append(el("div",{class:"answer",style:"--c:var("+(!ok?"--line":a===m?"--ok":"--ko")+")"},
+        el("span",{class:"small muted"},q),
+        el("p",null,"Vous : "+nm(m)+" · "+lui+" : "+(ok?nm(a):"en attente"))));
+    });
+    const reste=qs.length-vus;
+    const titre = !vus ? "En attente des choix "+deLui
+      : !reste && accord===vus ? "D'accord sur toute la ligne"
+      : "D'accord sur "+accord+" question"+(accord>1?"s":"")+" sur "+vus;
+    zone.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},titre),
+      el("p",{class:"muted"}, nm(0)+" : "+des[0]+" fois · "+nm(1)+" : "+des[1]+" fois."+(reste?" "+lui+" n'a pas fini : le résultat se complète tout seul.":"")),
+      liste), el("div",{class:"actions"},replayBtn()));
+    if(!reste){ clearInterval(minut); coeurs(14); tic([20,60,20,60,40]) }
+  }
+  peint();
+  charge().then(peint);
+  minut=setInterval(async()=>{
+    if(!actif()) return clearInterval(minut);
+    if(!document.hidden && await charge()) peint();
+  },2500);
 }
 
 /* ---------- Prière à deux ---------- */
@@ -965,7 +1180,8 @@ const Espace = (()=>{
     try{ await appel(chemin,corps); await synchro(); return true }
     catch(e){ if(e.statut===401) perdu(e.message); else dit(e.message,true); return false }
   }
-  return {rythme};
+  /* duo : qui est qui dans l'espace ; partie : les choix d'une partie de « Qui de nous deux ? » jouée à deux. */
+  return {rythme, duo:()=>E.token&&V?{moi:V.moi,noms:V.noms}:null, partie:corps=>appel("/partie",corps)};
 })();
 
 /* ---------- Rubriques ---------- */
@@ -994,7 +1210,7 @@ var BANQUE = (async function(){
   function remplace(cible, a){ if (a.length){ cible.length = 0; Array.prototype.push.apply(cible, a) } return a.length }
 
   try {
-    var q = sansTitres(await lignes("quiz")).map(function(l){ var p = l.split("|"); return {q: p[0], o: p.slice(1, 5), a: p[1]} })
+    var q = sansTitres(await lignes("quiz")).map(function(l){ var p = l.split("|"); return {q: p[0], o: p.slice(1, 5), a: p[1], n: Number(p[5]) || 1} })
       .filter(function(x){ return x.o.length === 4 });
     compte.quiz = remplace(QUIZ, coupe(q));
   } catch (e) {}
