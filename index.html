@@ -208,7 +208,7 @@ input[type=date]{width:100%;padding:10px 12px;border:1px solid var(--line);borde
 
       <nav class="seg" aria-label="Rubriques">
         <button type="button" id="t-jeux" aria-pressed="true">Jeux</button>
-        <button type="button" id="t-res" aria-pressed="false">Ressources</button>
+        <button type="button" id="t-res" aria-pressed="false">Bibliothèque</button>
         <button type="button" id="t-esp" aria-pressed="false">Notre espace<span class="dot" id="esp-dot" hidden></span></button>
       </nav>
 
@@ -498,7 +498,8 @@ const GAMES = [
  {id:"qui",  c:"--gold",   t:"Qui de nous deux ?",   s:"Désignez-vous, puis comparez vos réponses."},
  {id:"vers", c:"--emerald",t:"Le mot manquant",      s:"Complétez les versets sans ouvrir la Bible."},
  {id:"defi", c:"--violet", t:"Défis d'amour",        s:"Un geste concret, adapté à votre situation."},
- {id:"mariage",c:"--ruby", t:"Avant le oui",         s:"Les vraies questions à se poser avant le mariage."}
+ {id:"mariage",c:"--ruby", t:"Avant le oui",         s:"Les vraies questions à se poser avant le mariage."},
+ {id:"ref",  c:"--rose",   t:"La bonne référence",   s:"Retrouvez la référence d'un verset, ou le verset d'une référence."}
 ];
 
 const MARIAGE = [
@@ -611,7 +612,7 @@ function renderGames(){
       el("span",{class:"glass","aria-hidden":"true"}),
       el("div",null, el("strong",null,g.t, locked(g)?el("span",{class:"badge"},"Premium"):null), el("span",{class:"small muted"},g.s))));
   }
-  $("prem").textContent = "Sept jeux, tous gratuits.";
+  $("prem").textContent = "Huit jeux, tous gratuits.";
 }
 renderGames();
 
@@ -627,11 +628,12 @@ function open(g){
 }
 function replay(){ rounds[current.id]++; start() }
 function start(){
-  const niv = current.id==="quiz"||current.id==="vers" ? " · "+NIVEAUX[palier(current.id)-1] : "";
+  partieNo++;
+  const niv = ["quiz","vers","ref"].includes(current.id) ? " · "+NIVEAUX[palier(current.id)-1] : "";
   $("round").textContent = "Manche "+rounds[current.id]+niv+(invite?" · partie à deux":dist()&&S.code.trim()?" · code "+S.code.trim():"");
   const st=$("stage"); st.textContent="";
-  ({mariage:()=>deck(st, shuffle(MARIAGE, rndFor("mariage")), "Question", "Prenez votre temps. Une seule question bien discutée vaut mieux que dix survolées."),
-    quiz:()=>runQuiz(st,tirageQuiz(),"quiz"), vers:()=>runQuiz(st,tirageVersets(),"vers"),
+  ({mariage:()=>deck(st, shuffle(MARIAGE, rndFor("mariage")), "Question", "Prenez votre temps. Une seule question bien discutée vaut mieux que dix survolées.", "mariage"),
+    quiz:()=>runQuiz(st,tirageQuiz(),"quiz"), vers:()=>runQuiz(st,tirageVersets(),"vers"), ref:()=>runQuiz(st,tirageRef(),"ref"),
     coeur:()=>runCoeur(st), qui:()=>runQui(st), defi:()=>runDefi(st), prier:()=>runPrier(st)})[current.id]();
 }
 const replayBtn = label => el("button",{type:"button",class:"btn primary",on:{click:replay}},label||"Nouvelle manche");
@@ -677,68 +679,187 @@ function tirageVersets(){
   });
 }
 
+/* ---------- Partie reliée ----------
+   Lancée depuis une invitation de « Notre espace », la partie est la même sur les deux téléphones :
+   quand l'un passe à la question ou à la manche suivante, l'autre suit tout seul.
+   Le serveur garde la position et les réponses ; la réponse de l'autre n'arrive qu'après la sienne. */
+let partieNo = 0;
+function relie(sub, noeud, maj){
+  const duo = invite ? Espace.duo() : null;
+  if(!duo) return null;
+  const jeu=current.id, manche=rounds[jeu], graine=invite, gen=partieNo;
+  const nom=p=>p===2?"Nous deux":(duo.noms[p]||(p===duo.moi?"Moi":"Votre partenaire"));
+  const L={moi:duo.moi, nom, lui:nom(1-duo.moi), e:{pos:0,moi:[],autre:[]}, err:""};
+  L.deLui=(/^[aeiouyhàâéèêëîïôöûü]/i.test(L.lui)?"d'":"de ")+L.lui;
+  const vivant=()=>gen===partieNo && noeud.isConnected && !$("play").hidden && invite===graine;
+  let file=Promise.resolve(), enVol=0;
+  L.envoie=corps=>{ enVol++; file=file.then(async()=>{
+    try{
+      if(!vivant()) return;
+      const r=await Espace.partie(Object.assign({graine,jeu:sub,manche},corps||{}));
+      if(!vivant()) return;
+      if(r.manche>manche){ rounds[jeu]=r.manche; return start() }
+      L.e=r; L.err=""; maj(L);
+    }catch(e){ if(vivant()){ L.err=e.message; maj(L) } }
+    finally{ enVol-- }
+  }); return file };
+  L.envoie();
+  const t=setInterval(()=>{ if(!vivant()) return clearInterval(t); if(!document.hidden && !enVol) L.envoie() },2000);
+  return L;
+}
+const finit=(L,n)=>L && L.e.autre.slice(0,n).every(x=>x!=null);
+
+/* ---------- La bonne référence : un verset et sa référence ---------- */
+const LIVRE=/^(.+?)\s+(\d+):(\d+)/;
+function sourceRef(){
+  const vus=new Set(), out=[];
+  const ajoute=(t,r)=>{
+    r=String(r||"").replace(/\s*\(BYM\)\s*$/,"").trim(); t=String(t||"").trim();
+    const m=LIVRE.exec(r);
+    if(!t||!m||vus.has(r)||t.indexOf("_____")>=0) return;
+    vus.add(r); out.push({t,r,l:m[1],c:+m[2],v:+m[3]});
+  };
+  PAROLES.forEach(p=>ajoute(p[0],p[1]));
+  VERSETS.forEach(v=>ajoute(v.q.replace("_____",v.a),v.r));
+  return out;
+}
+/* Références voisines, inventées : même livre, chapitre ou verset proche. Plus le palier monte, plus elles sont proches. */
+function voisines(x,p,rnd){
+  const out=[], ecarts=p===3?[1,2,3,5]:[1,1,2];
+  for(let k=0;k<30&&out.length<6;k++){
+    const d=ecarts[Math.floor(rnd()*ecarts.length)]*(rnd()<.5?-1:1), chap=rnd()<(p===3?.5:.25);
+    const c=chap?x.c+d:x.c, v=chap?x.v:x.v+d;
+    if(c<1||v<1) continue;
+    const ref=x.l+" "+c+":"+v;
+    if(ref!==x.r && !out.includes(ref)) out.push(ref);
+  }
+  return out;
+}
+function tirageRef(){
+  const src=sourceRef(); if(src.length<4) return [];
+  const r=rounds.ref||1, p=palier("ref"), rnd=rndFor("ref"), lot=shuffle(src, rndFor("ref","lot",true)), out=[];
+  for(let k=0;k<8&&k<lot.length;k++){
+    const x=lot[((r-1)*8+k)%lot.length], autres=shuffle(src.filter(y=>y!==x),rnd);
+    const proche=[...autres].sort((a,b)=>(a.l===x.l?0:1)-(b.l===x.l?0:1));
+    if(k%2===0){
+      let w = p===1 ? autres.filter(y=>y.l!==x.l).map(y=>y.r) : p===2 ? proche.map(y=>y.r) : voisines(x,p,rnd);
+      w=[...new Set([...w, ...proche.map(y=>y.r)])].filter(y=>y!==x.r).slice(0,3);
+      out.push({q:"« "+x.t+" »", consigne:"De quel passage vient ce verset ?", o:shuffle([x.r,...w],rnd), a:x.r, r:""});
+    }else{
+      let w = p===1 ? autres.filter(y=>y.l!==x.l) : p===2 ? proche
+        : [...autres].sort((a,b)=>((a.l===x.l?0:500)+Math.abs(a.t.length-x.t.length))-((b.l===x.l?0:500)+Math.abs(b.t.length-x.t.length)));
+      w=[...new Set([...w, ...autres].map(y=>y.t))].filter(y=>y!==x.t).slice(0,3);
+      out.push({q:x.r, consigne:"Quel est ce verset ?", o:shuffle([x.t,...w],rnd), a:x.t, r:x.r+" (BYM)"});
+    }
+  }
+  return out;
+}
+
 function runQuiz(st, qs, id){
-  const nm=names(), score=[0,0]; let i=0;
-  const show=()=>{
-    st.textContent="";
-    if (i>=qs.length) return end();
-    const q=qs[i], turn=dist()?0:i%2;
-    const scores = dist()
-      ? el("div",{class:"scores"}, el("div",{class:"score turn"}, el("b",null,String(score[0])), el("span",{class:"small muted"},"Ton score")))
+  if(!qs.length) return st.append(el("div",{class:"card"}, el("p",{class:"muted"},"Pas encore assez de versets pour ce jeu.")));
+  const nm=names(), score=[0,0], notes=[]; let i=-1, ui=null, sigFin="", fete=false;
+  const juste=(q,c)=>typeof c==="string" && (q.saisie ? cle(c)===cle(q.a) : c===q.a);
+  const L=relie(id, st, ()=>{ if(L.e.pos>i && i<qs.length) aller(L.e.pos); else maj() });
+  const compte=t=>qs.reduce((n,q,k)=>n+(juste(q,t[k])?1:0),0);
+  function aller(n){ i=Math.min(n,qs.length); ui=null; sigFin=""; st.textContent=""; if(i>=qs.length) return fin(); poser() }
+  function suivant(){ const n=i+1; aller(n); if(L) L.envoie({pos:n}) }
+  function poser(){
+    const q=qs[i], turn=L||dist()?0:i%2;
+    const sc=el("b",null,String(L?compte(L.e.moi):score[0]));
+    const scores = L||dist()
+      ? el("div",{class:"scores"}, el("div",{class:"score turn"}, sc, el("span",{class:"small muted"},L?"Votre score":"Ton score")))
       : el("div",{class:"scores"}, ...[0,1].map(p=>el("div",{class:"score"+(p===turn?" turn":"")}, el("b",null,String(score[p])), el("span",{class:"small muted"},nm[p]+(p===turn?" · à toi":"")))));
-    const next=el("button",{type:"button",class:"btn primary",disabled:true,on:{click:()=>{i++;show()}}}, i===qs.length-1?"Voir le résultat":"Question suivante");
-    const fb=el("p",{class:"small muted",role:"status"});
-    const juge=ok=>{
-      if(ok) score[turn]++;
-      tic(ok?[12,45,12]:80); if(ok) coeurs(5);
-      fb.textContent=(ok?"Bonne réponse. ":"La bonne réponse : "+q.a+". ")+(q.r?q.r:"");
-      next.disabled=false; next.focus();
+    const next=el("button",{type:"button",class:"btn primary",disabled:true,on:{click:suivant}}, i===qs.length-1?"Voir le résultat":"Question suivante");
+    const passe=el("button",{type:"button",class:"btn",hidden:true,on:{click:suivant}},"Passer sans attendre");
+    const fb=el("p",{class:"small muted",role:"status"}), etat=el("p",{class:"small muted"});
+    let zone, champ=null, ok=null;
+    const marque=c=>{
+      if(ui.repondu) return; ui.repondu=true;
+      const bon=juste(q,c);
+      if(champ){ champ.value=c; champ.disabled=ok.disabled=true; champ.style.borderColor=bon?"var(--ok)":"var(--ko)" }
+      else [...zone.children].forEach(b=>{ b.disabled=true; if(b.textContent===q.a) b.classList.add("good"); else if(b.textContent===c) b.classList.add("bad") });
+      fb.textContent=(bon?"Bonne réponse. ":"La bonne réponse : "+q.a+". ")+(q.r?q.r:"");
+      return bon;
     };
-    let zone;
+    const repond=c=>{
+      if(ui.repondu) return;
+      const bon=marque(c);
+      if(bon){ score[turn]++; coeurs(5) } tic(bon?[12,45,12]:80);
+      notes[i]={p:turn,c};
+      if(L){ L.e.moi[i]=c; L.envoie({q:i,c}) }
+      maj(); (L?(next.disabled?passe:next):next).focus();
+    };
     if(q.saisie){
-      const champ=el("input",{type:"text",maxLength:40,autocomplete:"off",autocapitalize:"off",spellcheck:false,placeholder:"Écrivez le mot","aria-label":"Le mot manquant"});
-      const ok=el("button",{type:"button",class:"btn primary"},"Valider");
-      const valide=()=>{
-        if(champ.disabled||!champ.value.trim()) return;
-        const bon=cle(champ.value)===cle(q.a);
-        champ.disabled=ok.disabled=true; champ.style.borderColor=bon?"var(--ok)":"var(--ko)"; juge(bon);
-      };
+      champ=el("input",{type:"text",maxLength:40,autocomplete:"off",autocapitalize:"off",spellcheck:false,placeholder:"Écrivez le mot","aria-label":"Votre réponse"});
+      ok=el("button",{type:"button",class:"btn primary"},"Valider");
+      const valide=()=>{ if(!champ.disabled && champ.value.trim()) repond(champ.value.trim()) };
       ok.addEventListener("click",valide);
       champ.addEventListener("keydown",e=>{ if(e.key==="Enter") valide() });
       zone=el("div",{class:"app",style:"gap:8px"}, el("p",{class:"small muted"},q.indice), el("div",{class:"send"},champ,ok));
     }else{
       zone=el("div",{class:"opts"});
-      q.o.forEach(o=>zone.append(el("button",{type:"button",class:"opt",on:{click:ev=>{
-        const ok=o===q.a;
-        [...zone.children].forEach(b=>{ b.disabled=true; if(b.textContent===q.a) b.classList.add("good") });
-        if(!ok) ev.currentTarget.classList.add("bad");
-        juge(ok);
-      }}},o)));
+      q.o.forEach(o=>zone.append(el("button",{type:"button",class:"opt",on:{click:()=>repond(o)}},o)));
     }
+    ui={repondu:false, marque, next, passe, etat, sc};
     st.append(scores, el("div",{class:"prog","aria-hidden":"true"}, el("i",{style:"width:"+(i/qs.length*100)+"%"})), el("div",{class:"card"},
       el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length+(q.niv?" · "+q.niv:"")),
-      el("p",{class:"big"},q.q), zone, fb), el("div",{class:"actions"},next));
+      el("p",{class:"big"},q.q), q.consigne?el("p",{class:"small muted"},q.consigne):null, zone, fb, L?etat:null),
+      el("div",{class:"actions"},next,passe));
+    maj();
+  }
+  function maj(){
+    if(!ui){ if(i>=qs.length && L) fin(); return }
+    if(!L){ ui.next.disabled=!ui.repondu; return }
+    const m=L.e.moi[i], a=L.e.autre[i];
+    if(m!=null && !ui.repondu) ui.marque(m);
+    ui.sc.textContent=String(compte(L.e.moi));
+    ui.etat.textContent = L.err || (a!=null ? L.lui+" a répondu." : "En attente de la réponse "+L.deLui+"…")+(a!=null||!ui.repondu?"":" Vous découvrirez ses réponses à la fin de la manche.");
+    ui.next.disabled = !(ui.repondu && a!=null);
+    ui.passe.hidden = !(ui.repondu && a==null);
+  }
+  /* Fin de manche : les scores, puis chaque question avec la bonne réponse et la réponse de chacun. */
+  const ligne=(qui,c,q)=>{
+    const vide=c==null, cache=c===-1, bon=juste(q,c);
+    return el("p",{class:"small",style:"margin:2px 0;color:var("+(vide||cache?"--muted":bon?"--ok":"--ko")+")"},
+      qui+" : "+(vide?"pas de réponse":cache?"cachée tant que vous n'avez pas répondu":c+(bon?" ✓":" ✗")));
   };
-  const end=()=>{
-    let msg, sub; coeurs(14); tic([20,60,20,60,40]);
-    if (dist()){ msg=score[0]+" sur "+qs.length; sub="Annoncez vos scores l'un à l'autre. Celui qui perd choisit un verset à lire à voix haute." }
+  function fin(){
+    const moi=L?L.e.moi:[], autre=L?L.e.autre:[];
+    const sig=L?JSON.stringify([moi,autre,L.err]):"local";
+    if(sig===sigFin) return; sigFin=sig; st.textContent="";
+    if(!fete){ fete=true; coeurs(14); tic([20,60,20,60,40]) }
+    let msg, sub;
+    if(L){
+      const a=compte(moi), b=compte(autre), complet=finit(L,qs.length);
+      msg = a===b ? "Égalité, "+a+" partout" : a>b ? "Vous l'emportez, "+a+" à "+b : L.lui+" l'emporte, "+b+" à "+a;
+      sub = (complet?"":L.lui+" n'a pas fini : le résultat se complète tout seul. ")+"Le perdant choisit un verset à lire à voix haute.";
+    }else if(dist()){ msg=score[0]+" sur "+qs.length; sub="Annoncez vos scores l'un à l'autre. Celui qui perd choisit un verset à lire à voix haute." }
     else {
       const half=qs.length/2;
       msg = score[0]===score[1] ? "Égalité, "+score[0]+" partout" : (score[0]>score[1]?nm[0]:nm[1])+" l'emporte";
       sub = nm[0]+" : "+score[0]+" sur "+half+" · "+nm[1]+" : "+score[1]+" sur "+half+". Le perdant offre une prière au gagnant.";
     }
+    const liste=el("div",{class:"app",style:"gap:12px"});
+    qs.forEach((q,k)=>{
+      const lignes = L ? [ligne("Vous",moi[k],q), ligne(L.lui,autre[k],q)]
+        : notes[k] ? [ligne(dist()?"Vous":nm[notes[k].p],notes[k].c,q)] : [ligne(dist()?"Vous":nm[k%2],null,q)];
+      liste.append(el("div",{class:"answer",style:"--c:var(--line)"},
+        el("span",{class:"small muted"},(k+1)+". "+q.q), el("p",{style:"margin:2px 0;font-weight:600"},"Réponse : "+q.a), ...lignes));
+    });
     const suite = palier(id)<4 ? "La prochaine manche sera plus difficile." : "Vous jouez au niveau le plus élevé.";
     st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat · niveau "+NIVEAUX[palier(id)-1].toLowerCase()), el("p",{class:"big"},msg), el("p",{class:"muted"},sub), el("p",{class:"small muted"},suite)),
+      el("div",{class:"card"}, el("span",{class:"label"},L?"Vos réponses et celles "+L.deLui:"Les réponses de la manche"), liste),
       el("div",{class:"actions"},replayBtn(palier(id)<4?"Manche suivante, plus difficile":"Nouvelle manche")));
-  };
-  show();
+  }
+  aller(L?Math.max(0,L.e.pos):0);
 }
 
 /* ---------- Paquet de cartes générique ---------- */
-function deck(st, cards, label, hint){
+function deck(st, cards, label, hint, sub){
   let i=0;
   const big=el("p",{class:"big"}), lab=el("span",{class:"label"}), h=el("p",{class:"small muted"},hint||"");
-  const next=el("button",{type:"button",class:"btn primary",on:{click:()=>{ if(carte.classList.contains("cache")) return retourne(); i++; draw() }}},"Retourner la carte");
+  const avance=()=>{ i++; draw(); if(L) L.envoie({pos:i}) };
+  const next=el("button",{type:"button",class:"btn primary",on:{click:()=>{ if(carte.classList.contains("cache")) return retourne(); avance() }}},"Retourner la carte");
   /* Chaque carte arrive face cachée : on la touche pour la retourner, on la glisse vers la gauche pour passer à la suivante. */
   const carte=el("div",{class:"card flipcard",tabIndex:0,role:"button"},lab,big,h,dosCarte());
   const retourne=()=>{
@@ -750,13 +871,15 @@ function deck(st, cards, label, hint){
   carte.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); retourne() } });
   let x0=null;
   carte.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX },{passive:true});
-  carte.addEventListener("touchend",e=>{ if(x0!==null && x0-e.changedTouches[0].clientX>60 && !carte.classList.contains("cache") && i<cards.length){ i++; tic(10); draw() } x0=null });
+  carte.addEventListener("touchend",e=>{ if(x0!==null && x0-e.changedTouches[0].clientX>60 && !carte.classList.contains("cache") && i<cards.length){ tic(10); avance() } x0=null });
   const draw=()=>{
     if(i>=cards.length){ carte.classList.remove("cache"); carte.removeAttribute("aria-label"); big.textContent="Vous avez vu toutes les cartes de cette manche."; lab.textContent="Fin du paquet"; next.replaceWith(replayBtn("Rebattre les cartes")); return }
     big.textContent=cards[i]; lab.textContent=label+" "+(i+1)+" sur "+cards.length;
     carte.classList.add("cache"); next.textContent="Retourner la carte"; carte.setAttribute("aria-label","Carte "+(i+1)+" sur "+cards.length+", face cachée. Appuyez pour la retourner.");
   };
   st.append(carte, el("div",{class:"actions"},next));
+  const L=sub?relie(sub,carte,()=>{ if(L.e.pos>i){ i=Math.min(L.e.pos,cards.length); draw() } }):null;
+  if(L) h.textContent=(hint?hint+" ":"")+"Vous avancez ensemble : quand l'un passe à la carte suivante, l'autre suit.";
   draw();
 }
 
@@ -768,7 +891,7 @@ function runCoeur(st){
     cats.forEach(c=>chips.append(el("button",{type:"button",class:"chip","aria-pressed":String(c===cat),on:{click:()=>{cat=c;build()}}},c)));
     zone.textContent="";
     const pool = cat==="Tout" ? Object.values(COEUR).flat() : COEUR[cat];
-    deck(zone, shuffle(pool, rndFor("coeur",cat)), "Carte", "Chacun répond à son tour. Celui qui écoute ne coupe pas la parole.");
+    deck(zone, shuffle(pool, rndFor("coeur",cat)), "Carte", "Chacun répond à son tour. Celui qui écoute ne coupe pas la parole.", "coeur"+cats.indexOf(cat));
   };
   st.append(chips, zone); build();
 }
@@ -776,107 +899,78 @@ function runCoeur(st){
 function runDefi(st){
   const mo=dist()?"d":"e", pool=DEFIS.filter(d=>d[0]==="b"||d[0]===mo).map(d=>d[1]);
   deck(st, shuffle(pool, rndFor("defi",mo)), dist()?"Défi à distance":"Défi ensemble",
-    "Acceptez le défi ou passez à la carte suivante. Trois défis acceptés, c'est une belle semaine.");
+    "Acceptez le défi ou passez à la carte suivante. Trois défis acceptés, c'est une belle semaine.", "defi");
 }
 
 /* ---------- Qui de nous deux ---------- */
+/* Trois réponses possibles : l'un, l'autre, ou « Nous deux » quand on ne peut pas trancher. */
 function runQui(st){
-  const duo = invite ? Espace.duo() : null;
-  if(duo) return quiDuo(st, duo);
-  const qs=shuffle(QUI, rndFor("qui")).slice(0,10), nm=names(), tally=[0,0]; let i=0;
-  const show=()=>{
-    st.textContent="";
-    if(i>=qs.length){
-      const msg = tally[0]===tally[1] ? "Vous vous êtes désignés autant l'un que l'autre" : (tally[0]>tally[1]?nm[0]:nm[1])+" a été le plus désigné";
-      st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},msg),
-        el("p",{class:"muted"}, nm[0]+" : "+tally[0]+" fois · "+nm[1]+" : "+tally[1]+" fois."+(dist()?" Comparez vos écrans : avez-vous répondu pareil ?":""))),
-        el("div",{class:"actions"},replayBtn()));
-      return;
-    }
-    st.append(el("div",{class:"card"},
-      el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length),
-      el("p",{class:"big"},qs[i]),
-      el("p",{class:"small muted"}, dist()?"Choisissez chacun sur votre écran, puis annoncez votre réponse en même temps.":"Comptez jusqu'à trois et pointez du doigt. En cas de désaccord, débattez, puis tranchez."),
-      el("div",{class:"opts"}, ...[0,1].map(p=>el("button",{type:"button",class:"opt",on:{click:()=>{tally[p]++;i++;show()}}},nm[p])))));
-  };
-  show();
-}
-
-/* Partie lancée depuis « Notre espace » : chacun choisit sur son appareil, et les deux choix
-   se dévoilent quand les deux ont répondu. Le serveur garde les choix : on peut quitter et revenir. */
-function quiDuo(st, duo){
-  const qs=shuffle(QUI, rndFor("qui")).slice(0,10), moi=duo.moi, graine=invite, manche=rounds.qui;
-  const nm=p=>duo.noms[p]||(p===moi?"Moi":"Votre partenaire"), lui=nm(1-moi);
-  const deLui=(/^[aeiouyhàâéèêëîïôöûü]/i.test(lui)?"d'":"de ")+lui;
-  const zone=el("div",{class:"app",style:"gap:14px"}), err=el("p",{class:"small",role:"status",style:"color:var(--ko)"});
-  st.append(zone, err);
-  let etat=null, i=0, sig="", occupe=false, minut=null; const fetes=new Set();
-  const actif=()=>zone.isConnected && !$("play").hidden;
-  async function charge(corps){
-    while(occupe && corps) await new Promise(r=>setTimeout(r,80));
-    if(occupe) return false;
-    occupe=true;
-    try{
-      const r=await Espace.partie(Object.assign({graine,manche},corps||{}));
-      if(!actif()) return false;
-      if(!etat){ i=r.moi.slice(0,qs.length).findIndex(x=>x==null); if(i<0) i=qs.length }
-      etat=r; err.textContent=""; return true;
-    }catch(e){ if(actif()) err.textContent=e.message; return false }
-    finally{ occupe=false }
-  }
-  const rang=(p,quoi)=>el("div",{class:"answer"}, el("span",{class:"label"},p===moi?"Vous":nm(p)), el("p",null,quoi));
-  const connu=a=>a===0||a===1;
+  const qs=shuffle(QUI, rndFor("qui")).slice(0,10);
+  const L=relie("qui", st, ()=>{ if(L.e.pos>i && i<qs.length){ i=L.e.pos; sig="" } peint() });
+  const n0=names(), nm=p=>L?L.nom(p):p===2?"Nous deux":n0[p];
+  const tally=[0,0,0], local=[]; let i=0, sig="", fete=false; const fetes=new Set();
+  const connu=a=>a===0||a===1||a===2;
+  const suivant=()=>{ i++; sig=""; peint(); if(L) L.envoie({pos:i}) };
+  const choix=(p,quoi)=>el("div",{class:"answer"}, el("span",{class:"label"},p),
+    el("p",null,quoi));
   function peint(){
-    const s=i+"|"+JSON.stringify(etat); if(s===sig) return; sig=s;
-    zone.textContent="";
-    if(!etat) return void zone.append(el("div",{class:"card"}, el("p",{class:"muted"},"Connexion à votre partie…")));
+    const s=i+"|"+(L?JSON.stringify([L.e.moi,L.e.autre,L.err]):local.length); if(s===sig) return; sig=s;
+    st.textContent="";
     if(i>=qs.length) return bilan();
-    const m=etat.moi[i], a=etat.autre[i];
     const carte=el("div",{class:"card"}, el("span",{class:"label"},"Question "+(i+1)+" sur "+qs.length), el("p",{class:"big"},qs[i]));
-    if(m==null){
-      const opts=el("div",{class:"opts"}), fige=v=>[...opts.children].forEach(b=>b.disabled=v);
-      [0,1].forEach(p=>opts.append(el("button",{type:"button",class:"opt",on:{click:async()=>{
-        fige(true);
-        if(await charge({q:i,c:p})) peint(); else fige(false);
-      }}}, nm(p)+(p===moi?" (moi)":""))));
-      carte.append(el("p",{class:"small muted"}, a!=null ? lui+" a déjà répondu. Son choix s'affichera après le vôtre."
-        : "Chacun choisit de son côté. Vos deux choix se dévoilent quand vous avez répondu tous les deux."), opts);
-      zone.append(carte);
-    }else{
-      carte.append(rang(moi, nm(m)));
-      if(connu(a)){
-        carte.append(rang(1-moi, nm(a)), el("p",{style:"font-weight:600;color:var("+(a===m?"--ok":"--ko")+")"}, a===m?"Même réponse !":"Pas d'accord : expliquez-vous."));
-        if(a===m && !fetes.has(i)){ coeurs(6); tic([12,45,12]) }
-        fetes.add(i);
-      }else carte.append(el("p",{class:"small muted"},"En attente du choix "+deLui+"…"));
-      zone.append(carte, el("div",{class:"actions"}, el("button",{type:"button",class:"btn primary",on:{click:()=>{ i++; peint() }}}, i===qs.length-1?"Voir le résultat":"Question suivante")));
+    const m=L?L.e.moi[i]:null, a=L?L.e.autre[i]:null;
+    if(!L || m==null){
+      const opts=el("div",{class:"opts"});
+      [0,1,2].forEach(p=>opts.append(el("button",{type:"button",class:"opt",on:{click:()=>{
+        if(!L){ tally[p]++; local[i]=p; i++; sig=""; return peint() }
+        [...opts.children].forEach(b=>b.disabled=true);
+        L.e.moi[i]=p; L.envoie({q:i,c:p}); sig=""; peint();
+      }}}, nm(p)+(L&&p===L.moi?" (moi)":""))));
+      carte.append(el("p",{class:"small muted"},
+        L ? (a!=null ? L.lui+" a déjà répondu. Son choix s'affichera après le vôtre." : "Chacun choisit de son côté. Vos deux choix se dévoilent quand vous avez répondu tous les deux.")
+        : dist() ? "Choisissez chacun sur votre écran, puis annoncez votre réponse en même temps."
+        : "Comptez jusqu'à trois et pointez du doigt. Si vous ne pouvez pas trancher, choisissez « Nous deux »."), opts);
+      if(L&&L.err) carte.append(el("p",{class:"small",style:"color:var(--ko)"},L.err));
+      return st.append(carte);
     }
+    carte.append(choix("Vous", nm(m)));
+    if(connu(a)){
+      carte.append(choix(L.lui, nm(a)), el("p",{style:"font-weight:600;color:var("+(a===m?"--ok":"--ko")+")"}, a===m?"Même réponse !":"Pas d'accord : expliquez-vous."));
+      if(a===m && !fetes.has(i)){ coeurs(6); tic([12,45,12]) }
+      fetes.add(i);
+    }else carte.append(el("p",{class:"small muted"},"En attente du choix "+L.deLui+"…"));
+    const next=el("button",{type:"button",class:"btn primary",disabled:!connu(a),on:{click:suivant}}, i===qs.length-1?"Voir le résultat":"Question suivante");
+    const passe=connu(a)?null:el("button",{type:"button",class:"btn",on:{click:suivant}},"Passer sans attendre");
+    st.append(carte, el("div",{class:"actions"},next,passe));
   }
   function bilan(){
-    let accord=0, vus=0; const des=[0,0], liste=el("div",{class:"app",style:"gap:10px"});
+    if(!fete){ fete=true; coeurs(14); tic([20,60,20,60,40]) }
+    if(!L){
+      const msg = tally[0]===tally[1] ? "Vous vous êtes désignés autant l'un que l'autre" : (tally[0]>tally[1]?n0[0]:n0[1])+" a été le plus désigné";
+      const liste=el("div",{class:"app",style:"gap:10px"});
+      qs.forEach((q,k)=>liste.append(el("div",{class:"answer",style:"--c:var(--line)"}, el("span",{class:"small muted"},q), el("p",null,nm(local[k])))));
+      return st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},msg),
+        el("p",{class:"muted"}, n0[0]+" : "+tally[0]+" fois · "+n0[1]+" : "+tally[1]+" fois · Nous deux : "+tally[2]+" fois."+(dist()?" Comparez vos écrans : avez-vous répondu pareil ?":"")), liste),
+        el("div",{class:"actions"},replayBtn()));
+    }
+    let accord=0, vus=0; const des=[0,0,0], liste=el("div",{class:"app",style:"gap:10px"});
     qs.forEach((q,k)=>{
-      const m=etat.moi[k], a=etat.autre[k], ok=connu(a);
+      const m=L.e.moi[k], a=L.e.autre[k], ok=connu(a);
       if(connu(m)) des[m]++;
       if(ok){ des[a]++; vus++; if(a===m) accord++ }
       liste.append(el("div",{class:"answer",style:"--c:var("+(!ok?"--line":a===m?"--ok":"--ko")+")"},
         el("span",{class:"small muted"},q),
-        el("p",null,"Vous : "+nm(m)+" · "+lui+" : "+(ok?nm(a):"en attente"))));
+        el("p",null,"Vous : "+(connu(m)?nm(m):"pas de réponse")+" · "+L.lui+" : "+(ok?nm(a):a===-1?"cachée":"en attente"))));
     });
-    const reste=qs.length-vus;
-    const titre = !vus ? "En attente des choix "+deLui
+    const reste=!finit(L,qs.length);
+    const titre = !vus ? "En attente des choix "+L.deLui
       : !reste && accord===vus ? "D'accord sur toute la ligne"
       : "D'accord sur "+accord+" question"+(accord>1?"s":"")+" sur "+vus;
-    zone.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},titre),
-      el("p",{class:"muted"}, nm(0)+" : "+des[0]+" fois · "+nm(1)+" : "+des[1]+" fois."+(reste?" "+lui+" n'a pas fini : le résultat se complète tout seul.":"")),
+    st.append(el("div",{class:"card"}, el("span",{class:"label"},"Résultat"), el("p",{class:"big"},titre),
+      el("p",{class:"muted"}, nm(0)+" : "+des[0]+" fois · "+nm(1)+" : "+des[1]+" fois · Nous deux : "+des[2]+" fois."+(reste?" "+L.lui+" n'a pas fini : le résultat se complète tout seul.":"")),
       liste), el("div",{class:"actions"},replayBtn()));
-    if(!reste){ clearInterval(minut); coeurs(14); tic([20,60,20,60,40]) }
   }
   peint();
-  charge().then(peint);
-  minut=setInterval(async()=>{
-    if(!actif()) return clearInterval(minut);
-    if(!document.hidden && await charge()) peint();
-  },2500);
 }
 
 /* ---------- Prière à deux ---------- */
@@ -891,6 +985,7 @@ function runPrier(st){
       el("div",null, el("span",{class:"label"},"Une parole"), el("blockquote",null,"« "+v[0]+" »"), el("p",{class:"small muted"},v[1]+" · Bible de Yéhoshoua ha Mashiah")))),
     el("p",{class:"small muted"}, dist()?"Priez à voix haute pendant l'appel, l'un après l'autre, puis dites amen ensemble.":"Tenez-vous les mains. L'un commence, l'autre termine."),
     el("div",{class:"actions"},replayBtn("Autre temps de prière")));
+  relie("prier", st.firstChild, ()=>{});
 }
 /* ---------- Ressources : lues dans le fichier ressources.txt (une ligne par ressource) ---------- */
 const Ressources = (()=>{
@@ -904,10 +999,10 @@ const Ressources = (()=>{
   }
   function peint(){
     const z=$("p-res"); z.textContent="";
-    z.append(el("div",null, el("h2",null,"Ressources"),
+    z.append(el("div",null, el("h2",null,"Bibliothèque"),
       el("p",{class:"small muted"},"Des livres, des podcasts et des enseignements pour nourrir votre couple et préparer votre mariage.")));
     if(liste===null){ z.append(el("p",{class:"muted"},"Chargement…")); return }
-    if(!liste.length){ z.append(el("div",{class:"panel"}, el("p",{class:"muted"},"Aucune ressource pour le moment. Revenez bientôt."))); return }
+    if(!liste.length){ z.append(el("div",{class:"panel"}, el("p",{class:"muted"},"La bibliothèque est vide pour le moment. Revenez bientôt."))); return }
     const cats=[...new Set(liste.map(r=>r.k))];
     if(cat!=="Tout" && !cats.includes(cat)) cat="Tout";
     const chips=el("div",{class:"chips",style:"--c:var(--azur)"});
@@ -1255,8 +1350,8 @@ var BANQUE = (async function(){
 
   var note = document.getElementById("prem");
   if (note && Object.keys(compte).length) note.textContent = hors
-    ? "Sept jeux gratuits. Hors connexion : 300 questions par jeu."
-    : "Sept jeux gratuits. En ligne : toute la banque de questions, enrichie régulièrement.";
+    ? "Huit jeux gratuits. Hors connexion : 300 questions par jeu."
+    : "Huit jeux gratuits. En ligne : toute la banque de questions, enrichie régulièrement.";
   return compte;
 })();
 
