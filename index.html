@@ -7,6 +7,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Trois Fils">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Corde à Trois Fils">
 <meta property="og:description" content="Des jeux pour couples chrétiens, à jouer ensemble ou à distance.">
@@ -1084,6 +1088,74 @@ const Espace = (()=>{
     if(!r.ok||!j){ const err=new Error((j&&j.error)||"L'espace à deux n'est pas disponible pour le moment."); err.statut=r.status; throw err }
     return j;
   }
+
+  /* --- Notifications sur le téléphone (Web Push) ---
+     Seulement dans l'appli installable (page avec manifeste). Sur iPhone, il faut l'avoir installée sur l'écran d'accueil. */
+  const appli=!!document.querySelector('link[rel="manifest"]');
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const installee=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+  const pushOk=()=>"serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  const versOctets=s=>{ s=s.replace(/-/g,"+").replace(/_/g,"/"); s+="=".repeat((4-s.length%4)%4); return Uint8Array.from(atob(s),c=>c.charCodeAt(0)) };
+  const versTexte=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  let notifMsg="", notifRepare=false, sigNotif="";
+  async function abonne(){
+    const reg=await navigator.serviceWorker.ready;
+    const {cle}=await appel("/push-cle");
+    let sub=await reg.pushManager.getSubscription();
+    const k=sub&&sub.options&&sub.options.applicationServerKey;
+    if(sub && k && versTexte(k)!==cle){ await sub.unsubscribe(); sub=null }
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:versOctets(cle)});
+    const j=sub.toJSON();
+    await appel("/abonner",{endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth});
+  }
+  async function activeNotif(){
+    notifMsg="Un instant…"; peintNotif();
+    try{
+      const p=await Notification.requestPermission();
+      if(p==="granted"){ await abonne(); store.set("notif","1"); notifMsg=""; await synchro() }
+      else notifMsg="";
+    }catch(e){ notifMsg=(e&&e.message)||"Activation impossible. Réessayez."; }
+    peintNotif();
+  }
+  async function coupeNotif(){
+    try{
+      const reg=await navigator.serviceWorker.getRegistration(), s=reg&&await reg.pushManager.getSubscription();
+      if(s) await s.unsubscribe();
+      await appel("/abonner",{off:true}); store.set("notif","0"); notifMsg=""; await synchro();
+    }catch(e){ notifMsg=e.message }
+    peintNotif();
+  }
+  /* Si le serveur a oublié l'abonnement (redémarrage sans disque), on le renvoie sans rien demander. */
+  function repareNotif(v){
+    if(notifRepare||!appli||v.notif||store.get("notif","")!=="1"||!pushOk()||Notification.permission!=="granted") return;
+    notifRepare=true; abonne().catch(()=>{});
+  }
+  function peintNotif(){
+    if(!U||!U.notif) return;
+    const z=U.notif, v=V;
+    if(!appli){ z.hidden=true; return }
+    const perm=pushOk()?Notification.permission:"";
+    const sig=[!!v, v&&v.notif, v&&v.notifAutre, v&&v.complet, perm, notifMsg, installee()].join("|");
+    if(sig===sigNotif) return; sigNotif=sig;
+    z.hidden=false; z.textContent="";
+    const lui=v&&v.noms[1-v.moi]||"votre partenaire";
+    z.append(el("span",{class:"label"},"Notifications"));
+    let texte, bouton=null;
+    if(ios && !installee()) texte="Sur iPhone, les notifications n'arrivent que dans l'appli installée : touchez le bouton Partager (le carré avec une flèche), puis « Sur l'écran d'accueil ». Ouvrez ensuite l'appli depuis sa nouvelle icône et revenez ici.";
+    else if(!pushOk()) texte="Ce navigateur ne peut pas recevoir de notifications. Ouvrez l'appli dans Chrome, Samsung Internet, Edge, Firefox ou Safari.";
+    else if(perm==="denied") texte="Les notifications sont bloquées pour cette appli. Autorisez-les dans les réglages du téléphone (Notifications), puis revenez ici.";
+    else if(perm==="granted" && v && v.notif){
+      texte="Activées sur ce téléphone : vous êtes prévenu quand "+lui+" vous écrit, vous invite à jouer ou relève un défi.";
+      bouton=el("button",{type:"button",class:"btn",on:{click:coupeNotif}},"Désactiver");
+    }else{
+      texte="Soyez prévenu sur ce téléphone quand "+lui+" vous écrit, vous invite à jouer ou relève un défi, même appli fermée.";
+      bouton=el("button",{type:"button",class:"btn primary",on:{click:activeNotif}},"Activer les notifications");
+    }
+    z.append(el("p",{class:"small"},texte));
+    if(v && v.complet && !v.notifAutre) z.append(el("p",{class:"small muted"},lui.charAt(0).toUpperCase()+lui.slice(1)+" n'a pas encore activé les notifications sur son téléphone."));
+    if(bouton) z.append(el("div",{class:"actions"},bouton));
+    if(notifMsg) z.append(el("p",{class:"small",role:"status"},notifMsg));
+  }
   const dit=(t,bad)=>{ if(U&&U.msg){ U.msg.textContent=t||""; U.msg.style.color=bad?"var(--ko)":"" } };
 
   /* --- Synchronisation --- */
@@ -1104,7 +1176,7 @@ const Espace = (()=>{
       if(V && v.flamme>V.flamme){ tic([30,60,30,60,90]); coeurs(16) }
       else if(V && recus){ tic([20,70,20]); if(v.messages.some(m=>m.de!==v.moi&&m.texte==="❤️")) coeurs(12) }
       if(V && v.defi.autre && !V.defi.autre) coeurs(10);
-      V=v;
+      V=v; repareNotif(v);
       if(recus && (S.onglet!=="esp" || !$("play").hidden)) $("esp-dot").hidden=false;
       if(S.onglet==="esp"){ peint(); if(U&&U.msg&&U.msg.dataset.reseau){ dit(""); delete U.msg.dataset.reseau } }
     }catch(e){
@@ -1127,13 +1199,13 @@ const Espace = (()=>{
     const z=$("p-esp");
     if(!E.token){ U=null; z.textContent=""; return accueil(z) }
     if(U&&U.monte) return peint();
-    z.textContent=""; sigJour=sigFil=""; tiroir="";
-    U={monte:true, tete:el("div",{class:"panel"}), inv:el("div",{class:"panel",hidden:true}), jour:el("div",{class:"panel",style:"border-top:6px solid var(--c)"}),
+    z.textContent=""; sigJour=sigFil=sigNotif=""; tiroir="";
+    U={monte:true, tete:el("div",{class:"panel"}), notif:el("div",{class:"panel",hidden:true}), inv:el("div",{class:"panel",hidden:true}), jour:el("div",{class:"panel",style:"border-top:6px solid var(--c)"}),
       fil:el("div",{class:"thread","aria-live":"polite"}), tiroir:el("div",{hidden:true}), msg:el("p",{class:"small",role:"status"})};
     const champ=el("input",{type:"text",maxLength:500,placeholder:"Écrire un message…","aria-label":"Votre message",autocomplete:"off"});
     const part=async()=>{ const t=champ.value.trim(); if(!t) return; champ.value=""; if(!(await envoie("/message",{type:"texte",texte:t}))) champ.value=t };
     champ.addEventListener("keydown",e=>{ if(e.key==="Enter") part() });
-    z.append(U.tete, U.inv, U.jour,
+    z.append(U.tete, U.inv, U.notif, U.jour,
       el("div",{class:"panel"}, el("h2",null,"Notre discussion"), U.fil,
         el("div",{class:"send"}, champ, el("button",{type:"button",class:"btn primary",on:{click:part}},"Envoyer")),
         el("div",{class:"actions"},
@@ -1192,6 +1264,7 @@ const Espace = (()=>{
           : !n ? "Écrivez-vous tous les deux dans la même journée pour allumer votre flamme."
           : v.allumee ? n+" jour"+(n>1?"s":"")+" d'affilée. Flamme entretenue aujourd'hui."
           : n+" jour"+(n>1?"s":"")+" d'affilée. "+(v.actif[moi]?"Au tour de "+lui+" d'écrire aujourd'hui.":"Écrivez-vous aujourd'hui pour la garder.")))));
+    peintNotif();
     if(!v) return;
     /* invitation du partenaire */
     U.inv.hidden=v.complet;
@@ -1288,7 +1361,11 @@ function onglet(o){
   Espace.rythme();
 }
 ONGLETS.forEach(k=>$("t-"+k).addEventListener("click",()=>onglet(k)));
-onglet(ONGLETS.includes(store.get("onglet",""))?store.get("onglet",""):"jeux");
+/* Une notification ouvre l'appli sur « Notre espace » (adresse ?onglet=esp, ou message du service worker si elle est déjà ouverte). */
+const ongletDemande=new URLSearchParams(location.search).get("onglet");
+onglet(ONGLETS.includes(ongletDemande)?ongletDemande:ONGLETS.includes(store.get("onglet",""))?store.get("onglet",""):"jeux");
+if(ongletDemande) history.replaceState(null,"",location.pathname);
+if("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message",e=>{ if(e.data==="espace"){ if(!$("play").hidden) $("back").click(); onglet("esp") } });
 </script>
 
 <script>
@@ -1355,18 +1432,44 @@ var BANQUE = (async function(){
   return compte;
 })();
 
-/* Installation : bouton affiché quand le navigateur le propose, et fonctionnement hors connexion. */
+/* Installation : sur Android (Chrome, Samsung, Edge, Opera…), le bouton ouvre la fenêtre d'installation du navigateur.
+   Ailleurs (iPhone, Firefox, autres navigateurs), on explique le geste à faire. Rien ne s'affiche une fois l'appli installée. */
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});
 (function(){
-  var offre = null, zone = document.querySelector("#home .setup");
-  var bouton = document.createElement("button");
-  bouton.type = "button"; bouton.className = "btn primary"; bouton.id = "installer";
-  bouton.textContent = "Installer l'application"; bouton.hidden = true;
-  bouton.style.alignSelf = "flex-start";
-  zone.parentNode.insertBefore(bouton, zone);
-  window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); offre = e; bouton.hidden = false; });
-  bouton.addEventListener("click", function(){ if (!offre) return; offre.prompt(); offre = null; bouton.hidden = true; });
-  window.addEventListener("appinstalled", function(){ bouton.hidden = true; });
+  var offre = null, zone = document.querySelector("#home .setup"), ua = navigator.userAgent;
+  var ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var autreAppli = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Snapchat|TikTok|musical_ly|LinkedInApp|Twitter/i.test(ua);
+  var installee = function(){ return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true };
+  var plusTard = function(){ try { return Date.now() - Number(localStorage.getItem("ctf-installer-plus-tard") || 0) < 7 * 86400000 } catch (e) { return false } };
+  var boite = document.createElement("div"); boite.className = "panel"; boite.hidden = true;
+  var titre = document.createElement("span"); titre.className = "label"; titre.textContent = "Installer l'appli sur votre téléphone";
+  var texte = document.createElement("p"); texte.className = "small";
+  var actions = document.createElement("div"); actions.className = "actions";
+  var bouton = document.createElement("button"); bouton.type = "button"; bouton.className = "btn primary"; bouton.id = "installer"; bouton.textContent = "Installer l'application"; bouton.hidden = true;
+  var tard = document.createElement("button"); tard.type = "button"; tard.className = "btn"; tard.textContent = "Plus tard";
+  actions.appendChild(bouton); actions.appendChild(tard);
+  boite.appendChild(titre); boite.appendChild(texte); boite.appendChild(actions);
+  zone.parentNode.insertBefore(boite, zone);
+  function aide(){
+    if (installee() || plusTard()) { boite.hidden = true; return; }
+    boite.hidden = false; bouton.hidden = !offre;
+    texte.textContent = offre ? "Ajoutez Corde à Trois Fils à votre écran d'accueil : elle s'ouvre comme une appli, fonctionne sans connexion et peut vous envoyer des notifications."
+      : autreAppli ? "Vous êtes dans le navigateur d'une autre appli (Facebook, Instagram…), qui ne permet pas l'installation. Touchez le menu ⋯ puis « Ouvrir dans le navigateur » (Chrome ou Safari), et revenez ici."
+      : ios ? "Sur iPhone et iPad : touchez le bouton Partager (le carré avec une flèche vers le haut), puis « Sur l'écran d'accueil », puis « Ajouter ». Ouvrez ensuite l'appli depuis sa nouvelle icône."
+      : /SamsungBrowser/.test(ua) ? "Dans Samsung Internet : touchez le menu ☰ en bas de l'écran, puis « Ajouter page à » et « Écran d'accueil »."
+      : /Firefox|FxiOS/.test(ua) ? "Dans Firefox : touchez le menu ⋮, puis « Installer » ou « Ajouter à l'écran d'accueil »."
+      : /Android/.test(ua) ? "Touchez le menu ⋮ de votre navigateur, puis « Installer l'application » ou « Ajouter à l'écran d'accueil ». Si vous ne le trouvez pas, ouvrez cette page dans Chrome."
+      : "Sur ordinateur, dans Chrome ou Edge : cliquez sur l'icône d'installation à droite de la barre d'adresse. Sur téléphone, ouvrez cette même adresse pour l'installer.";
+  }
+  window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); offre = e; aide(); });
+  bouton.addEventListener("click", function(){
+    if (!offre) return;
+    var o = offre; offre = null; o.prompt();
+    (o.userChoice || Promise.resolve()).then(aide, aide);
+  });
+  tard.addEventListener("click", function(){ try { localStorage.setItem("ctf-installer-plus-tard", String(Date.now())) } catch (e) {} boite.hidden = true; });
+  window.addEventListener("appinstalled", function(){ offre = null; boite.hidden = true; });
+  setTimeout(aide, 1200);
 })();
 </script>
 </html>
